@@ -1,0 +1,29 @@
+## ----------------------------------------------------------------------------
+## nexus | nexus_XeBox.config.mac
+##
+## Configuration macro to simulate individual particles
+## in a box of xenon.
+##
+## The NEXT Collaboration
+## ----------------------------------------------------------------------------
+
+/run/verbose 1
+/event/verbose 0
+/tracking/verbose 0
+
+/process/em/verbose 0
+
+/Geometry/XeBox/LXe true
+/Geometry/XeBox/length 2. m
+/Geometry/XeBox/width 1. m
+/Geometry/XeBox/height 0.5 m
+/Geometry/XeBox/pressure 10. bar
+
+/process/optical/processActivation Cerenkov false
+
+/Generator/AlphaGenerator/region INSIDE
+/Generator/AlphaGenerator/energy_low 100. eV
+/Generator/AlphaGenerator/energy_high 110. eV
+
+
+/nexus/persistency/outputFile nexus.next
