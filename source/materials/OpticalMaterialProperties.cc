@@ -1401,8 +1401,8 @@ namespace opticalprops {
       optPhotMaxE_
     };
     std::vector<G4double> abslength = {
-      noAbsLength_,
-      noAbsLength_,  4537. * mm,  329.7 * mm,  98.60 * mm,  36.94 * mm,  10.36 * mm,  4.356 * mm,
+      5.*m,
+      5.*m,  4537. * mm,  329.7 * mm,  98.60 * mm,  36.94 * mm,  10.36 * mm,  4.356 * mm,
       2.563 * mm,    1.765 * mm,  1.474 * mm,  1.153 * mm,  0.922 * mm,  0.765 * mm,  0.671 * mm,
       0.671 * mm
     };

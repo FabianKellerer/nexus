@@ -100,7 +100,7 @@ REGISTER_CLASS(DefaultEventAction, G4UserEventAction)
       } else {
 	pm->InteractingEvent(false);
       }
-      if (!event->IsAborted() && edep > energy_min_ && edep < energy_max_) {
+      if (!event->IsAborted() && edep >= energy_min_ && edep < energy_max_) {
 	pm->StoreCurrentEvent(true);
       } else {
 	pm->StoreCurrentEvent(false);

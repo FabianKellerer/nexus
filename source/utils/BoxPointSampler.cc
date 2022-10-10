@@ -173,6 +173,16 @@ namespace nexus {
       point =  RotateAndTranslate(G4ThreeVector(x, y, z));
     }
 
+    // One-sided generation surface
+    else if (region == "X_SURF") {
+      G4double rand = G4UniformRand();
+      z = GetLength(0., inner_z_);
+      y = GetLength(0., inner_y_);
+      if (rand < 0.5) x = -0.5 * inner_x_;
+      else            x =  0.5 * inner_x_;
+      point = RotateAndTranslate(G4ThreeVector(x, y, z));
+    }
+
 
     // Unknown region
     else {
