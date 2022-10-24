@@ -239,21 +239,42 @@ G4Box* lab_solid = new G4Box("LAB", xlab,ylab,length_+1.*cm);
 
 G4ThreeVector OpticalFibre::GenerateVertex(const G4String& region) const
 {
-    G4double xlab = 2*radius_+1.*mm;
-    G4double ylab = (num_fibers_)*(2*radius_+fiber_dist_);
 
     if (region!="LAMP") {
-        G4int i = G4RandFlat::shootInt((long) 0, sqrt(num_fibers_));
-        G4int j = G4RandFlat::shootInt((long) 0, sqrt(num_fibers_));
-        G4ThreeVector position = G4ThreeVector((int(sqrt(num_fibers_))-1)*(2*radius_+fiber_dist_)-i*(2*radius_+fiber_dist_),
-                                                    (int(sqrt(num_fibers_))-1)*(2*radius_+fiber_dist_)-j*(2*radius_+fiber_dist_),
-                                                        0);
-        CylinderPointSampler* cyl_vertex_gen_ = new CylinderPointSampler(0., 2*length_, radius_,  0., position, 0);
-        return cyl_vertex_gen_->GenerateVertex(region);
+        
+        if (shape_=="round") {
+            G4int i = G4RandFlat::shootInt((long) 0, sqrt(num_fibers_));
+            G4int j = G4RandFlat::shootInt((long) 0, sqrt(num_fibers_));
+            G4ThreeVector position = G4ThreeVector((int(sqrt(num_fibers_))-1)*(2*radius_+fiber_dist_)-i*(2*radius_+fiber_dist_),
+                                                   (int(sqrt(num_fibers_))-1)*(2*radius_+fiber_dist_)-j*(2*radius_+fiber_dist_),
+                                                    0);
+            CylinderPointSampler* cyl_vertex_gen_ = new CylinderPointSampler(0., 2*length_, radius_,  0., position, 0);
+            return cyl_vertex_gen_->GenerateVertex(region);
+        } else {
+            G4int i = G4RandFlat::shootInt((long) 0, sqrt(num_fibers_));
+            G4int j = G4RandFlat::shootInt((long) 0, sqrt(num_fibers_));
+            G4ThreeVector position = G4ThreeVector((int(sqrt(num_fibers_))-1)*(2*radius_+fiber_dist_)-i*(2*radius_+fiber_dist_),
+                                                   (int(sqrt(num_fibers_))-1)*(2*radius_+fiber_dist_)-j*(2*radius_+fiber_dist_),
+                                                    0);
+            BoxPointSampler* cyl_vertex_gen_ = new BoxPointSampler(0., 2*length_, radius_,  0., position, 0);
+            return cyl_vertex_gen_->GenerateVertex(region);
+        }
     }
     else {
-        BoxPointSampler* cyl_vertex_gen_ = new BoxPointSampler(0.1*mm,
-                                        ylab,
+        G4double xlab = 2*radius_+1.*mm;
+        G4double ylab;
+        bool k = false;
+        for (G4int i = 0; i < num_fibers_ / 2 + 2; i++) {
+            if (i * i == num_fibers_) {
+                k = true;
+            }
+        }
+        if (k) {
+            ylab = (sqrt(num_fibers_))*(2*radius_+fiber_dist_);
+        } else {
+            ylab = (num_fibers_)*(2*radius_+fiber_dist_);
+        }
+        BoxPointSampler* cyl_vertex_gen_ = new BoxPointSampler(0.1*mm,ylab,
                                         lamp_size_,0,G4ThreeVector((xlab-1.*cm)/2-0.1*mm,(ylab-radius_-1.*mm)/2,-length_+lamp_size_),0);
         return cyl_vertex_gen_->GenerateVertex("WHOLE_VOL");
     }
