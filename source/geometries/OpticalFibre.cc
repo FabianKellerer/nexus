@@ -101,13 +101,13 @@ void OpticalFibre::Construct()
     // LAB. This is just a volume of air surrounding the detector
     G4double xlab;
     G4double ylab;
-    if (issquare(num_fibers_)) {
-        xlab = (sqrt(num_fibers_)-1)*(2*radius_+fiber_dist_)+1.*cm;
-        ylab = (sqrt(num_fibers_)-1)*(2*radius_+fiber_dist_)+1.*cm;
+    if (issquare(num_fibers_)&&num_fibers_>1) {
+        xlab = (sqrt(num_fibers_))*(2*radius_+fiber_dist_)-fiber_dist_;
+        ylab = (sqrt(num_fibers_))*(2*radius_+fiber_dist_)-fiber_dist_;
     } 
     else {
-        xlab = 2*radius_+1.*cm;
-        ylab = (num_fibers_-1)*(2*radius_+fiber_dist_)+1.*cm;
+        xlab = 2*radius_;
+        ylab = (num_fibers_)*(2*radius_+fiber_dist_)-fiber_dist_;
     }
 
 G4Box* lab_solid = new G4Box("LAB", xlab,ylab,length_+1.*cm);
@@ -170,7 +170,7 @@ G4Box* lab_solid = new G4Box("LAB", xlab,ylab,length_+1.*cm);
     else {
         //place fibers in a line
         for(G4int i=0; i<num_fibers_; i++){
-            G4ThreeVector position = G4ThreeVector((xlab-1.*cm)/2,(int(num_fibers_)-1)*(2*radius_+fiber_dist_)-i*(2*radius_+fiber_dist_),0);
+            G4ThreeVector position = G4ThreeVector((xlab-2*radius_)/2,(int(num_fibers_)-1)*(2*radius_+fiber_dist_)-i*(2*radius_+fiber_dist_),0);
             new G4PVPlacement(0,position,fiber_logic,
                             fiber_logic->GetName(),lab_logic,true,cntr,true);
             cntr+=1;
@@ -213,18 +213,19 @@ G4Box* lab_solid = new G4Box("LAB", xlab,ylab,length_+1.*cm);
     G4LogicalVolume* sensor_logic = sensor_ -> GetLogicalVolume();
     G4RotationMatrix sensor_rot;
     sensor_rot.rotateY(pi);
-    G4ThreeVector sensor_pos = G4ThreeVector((xlab-1.*cm)/2,
-                                             (ylab-1.*cm)/2,
-                                             length_+thickness_/3+0.333333333*mm);
+    G4ThreeVector sensor_pos = G4ThreeVector((xlab-2*radius_)/2,
+                                (ylab-2.*radius_)/2,
+                                length_+thickness_/3+0.333333333*mm);   
+    
 
     new G4PVPlacement(G4Transform3D(sensor_rot, sensor_pos), sensor_logic,
                         sensor_logic->GetName(), lab_logic, true,
                         cntr+1, true);
 
     // Debug volume to reflect trapped photons
-    G4Box* absorb_box = new G4Box("ABS",xlab-1.*cm,ylab-1.*cm,0.2*mm);
+    G4Box* absorb_box = new G4Box("ABS",xlab/2,ylab/2,0.2*mm);
     G4LogicalVolume* abs_log = new G4LogicalVolume(absorb_box,materials::FR4(),"ABS");
-    new G4PVPlacement(0,G4ThreeVector((xlab-1.*cm)/2,(ylab-1.*cm)/2,-length_-0.2*mm),abs_log,abs_log->GetName(),lab_logic,true,4,true);
+    new G4PVPlacement(0,G4ThreeVector((xlab-2*radius_)/2,(ylab-2.*radius_)/2,-length_-0.2*mm),abs_log,abs_log->GetName(),lab_logic,true,4,true);
     // Reflective surface
     G4MaterialPropertiesTable* refl_surf = new G4MaterialPropertiesTable();
     G4double energy2[]       = {0.2 * eV, 3.5 * eV, 3.6 * eV, 11.5 * eV};
