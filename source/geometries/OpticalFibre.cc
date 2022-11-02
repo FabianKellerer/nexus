@@ -131,7 +131,7 @@ G4Box* lab_solid = new G4Box("LAB", xlab,ylab,length_+1.*cm);
 
     G4Material* core_mat;
     if (core_mat_=="EJ280") {
-        core_mat = materials::EJ280();
+        core_mat = materials::PVT();
         core_mat->SetMaterialPropertiesTable(opticalprops::EJ280());
     }
     if (core_mat_=="EJ286") {
@@ -184,8 +184,8 @@ G4Box* lab_solid = new G4Box("LAB", xlab,ylab,length_+1.*cm);
     sensor_ -> SetVisibility(true);
 
     //Set the sensor window material
-    G4Material* window_mat_ = materials::Y11();
-    window_mat_->SetMaterialPropertiesTable(opticalprops::Y11());
+    G4Material* window_mat_ = materials::PVT();
+    window_mat_->SetMaterialPropertiesTable(opticalprops::EJ280());
     G4MaterialPropertyVector* window_rindex = window_mat_->GetMaterialPropertiesTable()->GetProperty("RINDEX");
     //G4MaterialPropertyVector* window_rindex = air->GetMaterialPropertiesTable()->GetProperty("RINDEX");
     sensor_ -> SetWindowRefractiveIndex(window_rindex);
@@ -276,7 +276,7 @@ G4ThreeVector OpticalFibre::GenerateVertex(const G4String& region) const
             ylab = (num_fibers_)*(2*radius_+fiber_dist_);
         }
         BoxPointSampler* cyl_vertex_gen_ = new BoxPointSampler(0.1*mm,ylab,
-                                        lamp_size_,0,G4ThreeVector((xlab-1.*cm)/2-0.1*mm,(ylab-radius_-1.*mm)/2,-length_+lamp_size_),0);
+                                        lamp_size_,0,G4ThreeVector((xlab-6*radius_)/2-0.1*mm,(ylab-radius_-1.*mm)/2,-length_+lamp_size_),0);
         return cyl_vertex_gen_->GenerateVertex("WHOLE_VOL");
     }
 }
