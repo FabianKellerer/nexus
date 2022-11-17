@@ -135,7 +135,7 @@ G4Box* lab_solid = new G4Box("LAB", xlab,ylab,length_+1.*cm);
         core_mat->SetMaterialPropertiesTable(opticalprops::EJ280());
     }
     if (core_mat_=="EJ286") {
-        core_mat = materials::EJ286();
+        core_mat = materials::PVT();
         core_mat->SetMaterialPropertiesTable(opticalprops::EJ286());
     }
     if (core_mat_=="Y11") {
