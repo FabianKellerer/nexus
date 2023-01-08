@@ -793,7 +793,7 @@ namespace materials {
 
     return mat;
   }
-  
+
 
   // Kuraray Y-11
   G4Material* Y11()
