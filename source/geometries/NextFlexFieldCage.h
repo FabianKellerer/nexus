@@ -78,7 +78,8 @@ namespace nexus {
     void BuildBuffer();
     void BuildELgap();
     void BuildLightTube();
-    void BuildFibersAndSensors();
+    void BuildFibers();
+    void BuildFiberSensors();
 
   private:
 

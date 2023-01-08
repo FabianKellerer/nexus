@@ -37,7 +37,7 @@ namespace nexus
         G4double radius_;     //radius of the cylindrical optical fibre
         G4double length_;     //length of the cylindrical optical fibre
         G4double fiber_dist_; //distance between the fibers
-        G4String shape_;      //shape of the fibers
+        G4bool   isround_;    //if false: square fibers
         G4double thickness_;  //thickness of the photosensor
         G4String core_mat_;   //core material of the fibre (EJ280, EJ286 or Y11)
         G4int    num_fibers_; //number of fibres in the bundle

@@ -43,7 +43,7 @@ using namespace CLHEP;
 REGISTER_CLASS(OpticalFibre,GeometryBase)
 
 OpticalFibre::OpticalFibre():
-    GeometryBase(), radius_(1.*mm), length_(1.*cm), fiber_dist_(0.*mm), shape_("round"), core_mat_("EJ280"), num_fibers_(1), lamp_size_(1.*cm), cyl_vertex_gen_(0)
+    GeometryBase(), radius_(1.*mm), length_(1.*cm), fiber_dist_(0.*mm), isround_(true), core_mat_("EJ280"), num_fibers_(1), lamp_size_(1.*cm), cyl_vertex_gen_(0)
     {
         msg_=new G4GenericMessenger(this,"/Geometry/OpticalFibre/","Control commands of geometry OpticalFibre");
 
@@ -66,7 +66,7 @@ OpticalFibre::OpticalFibre():
         length_cmd.SetRange("fiber_dist>0.");
 
         G4GenericMessenger::Command& shape_cmd =
-            msg_->DeclareProperty("shape",shape_,"Shape of the fibers (round or square)");
+            msg_->DeclareProperty("shape",isround_,"Shape of the fibers (round or square)");
         shape_cmd.SetParameterName("shape_cmd",false);
 
         G4GenericMessenger::Command& mat_cmd = 
@@ -143,10 +143,12 @@ G4Box* lab_solid = new G4Box("LAB", xlab,ylab,length_+1.*cm);
         core_mat->SetMaterialPropertiesTable(opticalprops::Y11());
     }
 
+    G4Material* tpb = materials::TPB();
+
     //define logical volume
     GenericWLSFiber* fiber =
-    new GenericWLSFiber("FIBER", shape_, 2*radius_,
-                        2*length_, 2, true,
+    new GenericWLSFiber("FIBER", isround_, 2*radius_,
+                        2*length_, true, true, tpb,
                         core_mat, true);
     fiber->Construct();
     G4LogicalVolume* fiber_logic = fiber->GetLogicalVolume();
@@ -243,7 +245,7 @@ G4ThreeVector OpticalFibre::GenerateVertex(const G4String& region) const
 
     if (region!="LAMP") {
         
-        if (shape_=="round") {
+        if (isround_) {
             G4int i = G4RandFlat::shootInt((long) 0, sqrt(num_fibers_));
             G4int j = G4RandFlat::shootInt((long) 0, sqrt(num_fibers_));
             G4ThreeVector position = G4ThreeVector((int(sqrt(num_fibers_))-1)*(2*radius_+fiber_dist_)-i*(2*radius_+fiber_dist_),
