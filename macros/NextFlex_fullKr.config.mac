@@ -9,6 +9,9 @@
 
 ### GEOMETRY
 
+# SYMMETRY
+/Geometry/NextFlex/symmetric        false
+
 # GAS SETTING
 /Geometry/NextFlex/gas              enrichedXe
 /Geometry/NextFlex/gas_pressure     15. bar
@@ -37,11 +40,20 @@
 
 /Geometry/NextFlex/fc_wls_mat       TPB
 
-/Geometry/NextFlex/fc_with_fibers   true
+/Geometry/NextFlex/fc_with_fibers   false
 /Geometry/NextFlex/fiber_mat        EJ280
 /Geometry/NextFlex/fiber_claddings  2
 /Geometry/NextFlex/fiber_thickness  1. mm
 /Geometry/NextFlex/fiber_shape      "round"
+/Geometry/NextFlex/fiber_visibility true
+
+/Geometry/NextFlex/light_tube false
+/Geometry/NextFlex/num_rings 45
+/Geometry/NextFlex/ring_width 10. mm
+/Geometry/NextFlex/ring_thickness 5. mm
+/Geometry/NextFlex/num_struts 20
+/Geometry/NextFlex/strut_thickness 9. mm
+/Geometry/NextFlex/strut_width 60. mm
 
 /Geometry/NextFlex/fiber_sensor_time_binning  25. ns
 
@@ -89,11 +101,13 @@
 /process/optical/processActivation Cerenkov false
 
 ### GENERATOR
-# Kripton
+# Krypton
 /Generator/Kr83mGenerator/region  AD_HOC
+#/Generator/Kr83mGenerator/region  ACTIVE
 /Geometry/NextFlex/specific_vertex  0. 0. 580. mm
 # single photon
 #/Generator/SingleParticle/particle opticalphoton
+#/Generator/SingleParticle/region ACTIVE
 #/Generator/SingleParticle/region FIBER_CORE
 #/Generator/SingleParticle/min_energy 2.88 eV
 #/Generator/SingleParticle/max_energy 2.88 eV
@@ -110,8 +124,8 @@
 
 
 ### VERBOSITY
-/control/verbose   0
-/run/verbose       0
+/control/verbose   1
+/run/verbose       1
 /event/verbose     0
 /tracking/verbose  0
 

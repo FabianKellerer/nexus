@@ -17,6 +17,7 @@
 #include "FactoryBase.h"
 #include "Visibilities.h"
 #include "GenericWLSFiber.h"
+#include "PmtR7378A.h"
 
 #include <G4GenericMessenger.hh>
 #include <G4Tubs.hh>
@@ -43,7 +44,7 @@ using namespace CLHEP;
 REGISTER_CLASS(OpticalFibre,GeometryBase)
 
 OpticalFibre::OpticalFibre():
-    GeometryBase(), radius_(1.*mm), length_(1.*cm), fiber_dist_(0.*mm), isround_(true), core_mat_("EJ280"), num_fibers_(1), lamp_size_(1.*cm), cyl_vertex_gen_(0)
+    GeometryBase(), radius_(1.*mm), length_(1.*cm), fiber_dist_(0.*mm), isround_(true), core_mat_("EJ280"), num_fibers_(1), lamp_size_(1.*cm),gap_(0.1*mm), cyl_vertex_gen_(0)
     {
         msg_=new G4GenericMessenger(this,"/Geometry/OpticalFibre/","Control commands of geometry OpticalFibre");
 
@@ -83,6 +84,12 @@ OpticalFibre::OpticalFibre():
         lamp_cmd.SetParameterName("lamp_size",false);
         lamp_cmd.SetRange("lamp_size>0");
 
+        G4GenericMessenger::Command& gap_cmd =
+            msg_->DeclareProperty("gap_size",gap_,"Size of the gap between fiber and sensor");
+        gap_cmd.SetUnitCategory("Length");
+        gap_cmd.SetParameterName("gap_size",false);
+        gap_cmd.SetRange("gap_size>0");
+
         cyl_vertex_gen_ = new CylinderPointSampler(radius_, length_, 0.,  0., G4ThreeVector(0., 0., 0.), 0);
 
         // hardcoded thickness of the photosensor
@@ -101,17 +108,17 @@ void OpticalFibre::Construct()
     // LAB. This is just a volume of air surrounding the detector
     G4double xlab;
     G4double ylab;
-    G4double puffer = 0*mm;
+    G4double puffer = 10*mm;
     if (issquare(num_fibers_)&&num_fibers_>1) {
         xlab = (sqrt(num_fibers_))*(2*radius_+fiber_dist_)-fiber_dist_;
         ylab = (sqrt(num_fibers_))*(2*radius_+fiber_dist_)-fiber_dist_;
     } 
     else {
-        xlab = 2*radius_;
+        xlab = 25.4*mm;//2*radius_;
         ylab = (num_fibers_)*(2*radius_+fiber_dist_)-fiber_dist_+puffer;
     }
 
-G4Box* lab_solid = new G4Box("LAB", xlab,ylab,length_+1.*cm);
+G4Box* lab_solid = new G4Box("LAB", xlab,ylab,length_+gap_+1.*cm);
 
     G4Material* air=G4NistManager::Instance()->FindOrBuildMaterial("G4_AIR");
     air->SetMaterialPropertiesTable(opticalprops::Vacuum());
@@ -142,6 +149,10 @@ G4Box* lab_solid = new G4Box("LAB", xlab,ylab,length_+1.*cm);
     if (core_mat_=="Y11") {
         core_mat = materials::Y11();
         core_mat->SetMaterialPropertiesTable(opticalprops::Y11());
+    }
+    if (core_mat_=="BCF92") {
+        core_mat = materials::PVT();
+        core_mat->SetMaterialPropertiesTable(opticalprops::BCF92(1.3*mm));
     }
 
     G4Material* tpb = materials::TPB();
@@ -184,12 +195,13 @@ G4Box* lab_solid = new G4Box("LAB", xlab,ylab,length_+1.*cm);
 
 
     //Build the sensor
-    sensor_  = new GenericPhotosensor("SENSOR", xlab, ylab, thickness_);
+/*    sensor_  = new GenericPhotosensor("SENSOR", xlab, ylab, thickness_);
     sensor_ -> SetVisibility(true);
 
     //Set the sensor window material
-    G4Material* window_mat_ = materials::PVT();
-    window_mat_->SetMaterialPropertiesTable(opticalprops::EJ280());
+    G4Material* window_mat_ =
+      G4NistManager::Instance()->FindOrBuildMaterial("G4_SILICON_DIOXIDE");
+    window_mat_->SetMaterialPropertiesTable(opticalprops::FusedSilica());
     G4MaterialPropertyVector* window_rindex = window_mat_->GetMaterialPropertiesTable()->GetProperty("RINDEX");
     //G4MaterialPropertyVector* window_rindex = air->GetMaterialPropertiesTable()->GetProperty("RINDEX");
     sensor_ -> SetWindowRefractiveIndex(window_rindex);
@@ -202,7 +214,7 @@ G4Box* lab_solid = new G4Box("LAB", xlab,ylab,length_+1.*cm);
     photosensor_mpt->AddProperty("REFLECTIVITY", energy, reflectivity, 4);
     photosensor_mpt->AddProperty("EFFICIENCY",   energy, efficiency,   4);
     sensor_->SetOpticalProperties(photosensor_mpt);
-    sensor_->SetTimeBinning(1*us);
+    //sensor_->SetTimeBinning(1*us);
 
     sensor_->SetWithWLSCoating(false);
 
@@ -219,19 +231,31 @@ G4Box* lab_solid = new G4Box("LAB", xlab,ylab,length_+1.*cm);
     sensor_rot.rotateY(pi);
     G4ThreeVector sensor_pos = G4ThreeVector((xlab-2*radius_)/2,
                                 (ylab-2.*radius_)/2,
-                                length_/2+thickness_/3+0.333333333*mm);   
+                                length_/2+thickness_/2+gap_/2);   
     
 
     new G4PVPlacement(G4Transform3D(sensor_rot, sensor_pos), sensor_logic,
                         sensor_logic->GetName(), lab_logic, true,
                         cntr+1, true);
+*/
+
+    G4RotationMatrix sensor_rot;
+    sensor_rot.rotateY(pi);
+    G4ThreeVector sensor_pos = G4ThreeVector((xlab-2*radius_)/2,
+                                (ylab-2.*radius_)/2,
+                                length_/2+gap_/2+21.5*mm);   
+    PmtR7378A pmt;
+    pmt.Construct();
+    pmt_logic_ = pmt.GetLogicalVolume();
+    new G4PVPlacement(G4Transform3D(sensor_rot, sensor_pos),
+  		      pmt_logic_, "PMT", lab_logic, true, cntr+1, true);
 
     // Debug volume to reflect trapped photons (Teflon)
     G4Box* absorb_box = new G4Box("ABS",xlab/2,ylab/2,0.2*mm);
-    G4Material* tefl_mat_ = materials::FR4();
-    //tefl_mat_->SetMaterialPropertiesTable(opticalprops::PTFE());
+    G4Material* tefl_mat_ = materials::PolishedAl();
+    tefl_mat_->SetMaterialPropertiesTable(opticalprops::PolishedAl());
     G4LogicalVolume* abs_log = new G4LogicalVolume(absorb_box,tefl_mat_,"ABS");
-    new G4PVPlacement(0,G4ThreeVector((xlab-2*radius_)/2,(ylab-2.*radius_)/2,-length_/2-0.2*mm),abs_log,abs_log->GetName(),lab_logic,true,4,true);
+    //new G4PVPlacement(0,G4ThreeVector((xlab-2*radius_)/2,(ylab-2.*radius_)/2,-length_/2-0.2*mm),abs_log,abs_log->GetName(),lab_logic,true,4,true);
     // Reflective surface
     //G4MaterialPropertiesTable* refl_surf = new G4MaterialPropertiesTable();
     //G4double energy2[]       = {0.2 * eV, 3.5 * eV, 3.6 * eV, 11.5 * eV};
@@ -281,12 +305,12 @@ G4ThreeVector OpticalFibre::GenerateVertex(const G4String& region) const
         } else {
             ylab = (num_fibers_)*(2*radius_+fiber_dist_)-fiber_dist_;
         }
-        BoxPointSampler* cyl_vertex_gen_ = new BoxPointSampler(0.1*mm,ylab,
-                                        lamp_size_,0,G4ThreeVector((xlab-6*radius_)/2-0.1*mm,(ylab-radius_-1.*mm)/2,-lamp_size_/2),0);
-        //G4RotationMatrix *lamp_rot = new G4RotationMatrix();
-        //lamp_rot->rotateY(pi/2);
-        //CylinderPointSampler* cyl_vertex_gen_ = new CylinderPointSampler(0.,0.1*mm,25.4/2.*mm,
-        //                                0.,G4ThreeVector((xlab-6*radius_)/2-0.1*mm,(ylab-radius_-1.*mm)/2+7.5/2.*mm,0),lamp_rot);
+        //BoxPointSampler* cyl_vertex_gen_ = new BoxPointSampler(0.1*mm,ylab,
+        //                                lamp_size_,0,G4ThreeVector((xlab-6*radius_)/2-0.1*mm,(ylab-radius_-1.*mm)/2,-lamp_size_/2),0);
+        G4RotationMatrix *lamp_rot = new G4RotationMatrix();
+        lamp_rot->rotateY(pi/2);
+        CylinderPointSampler* cyl_vertex_gen_ = new CylinderPointSampler(0.,0.1*mm,25.4/2.*mm,
+                                        0.,G4ThreeVector((xlab-6*radius_)/2-0.1*mm,(int(num_fibers_)-1)*(2*radius_+fiber_dist_)-2*(2*radius_+fiber_dist_)+5.*mm,-5.*mm),lamp_rot);
         return cyl_vertex_gen_->GenerateVertex("WHOLE_VOL");
     }
 }

@@ -42,10 +42,12 @@ namespace nexus
         G4String core_mat_;   //core material of the fibre (EJ280, EJ286 or Y11)
         G4int    num_fibers_; //number of fibres in the bundle
         G4double lamp_size_;  //size of photon generation region in z direction if LAMP region is chosen
+        G4double gap_;        //size of gap between fiber and sensor
 
         GenericPhotosensor*   sensor_;
         G4GenericMessenger*   msg_;
         CylinderPointSampler* cyl_vertex_gen_;
+        G4LogicalVolume* pmt_logic_;
     };
     
 } // namespace nexus

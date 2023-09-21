@@ -356,7 +356,41 @@ namespace materials {
     return mat;
   }
 
+  G4Material* PolishedAl()
+  {
+    G4String name = "Al";
 
+    G4Material* mat = G4Material::GetMaterial(name,false);
+
+    if (!mat) {
+      mat = new G4Material(name,2700*kg/m3, 1);
+
+      G4NistManager* nist = G4NistManager::Instance();
+
+      G4Element* Al = nist->FindOrBuildElement("Al");
+      mat->AddElement(Al,1);
+    }
+
+    return mat;
+  }
+
+  G4Material* Cu()
+  {
+    G4String name = "Cu";
+
+    G4Material* mat = G4Material::GetMaterial(name,false);
+
+    if (!mat) {
+      mat = new G4Material(name,8960*kg/m3, 1);
+
+      G4NistManager* nist = G4NistManager::Instance();
+
+      G4Element* Cu = nist->FindOrBuildElement("Cu");
+      mat->AddElement(Cu,1);
+    }
+
+    return mat;
+  }
 
   G4Material* Epoxy()
   {

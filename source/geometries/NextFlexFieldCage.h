@@ -78,8 +78,8 @@ namespace nexus {
     void BuildBuffer();
     void BuildELgap();
     void BuildLightTube();
-    void BuildFibers();
-    void BuildFiberSensors();
+    void BuildFieldCageRings();
+    void BuildFibersAndSensors();
 
   private:
 
@@ -125,11 +125,20 @@ namespace nexus {
     G4double photoe_prob_;
 
     // LIGHT_TUBE
+    G4bool   light_tube_;
     G4double light_tube_thickness_;
     G4double fc_length_;
     G4double light_tube_inner_rad_;
     G4double light_tube_outer_rad_;
     G4double wls_thickness_;
+
+    // FIELD CAGE RINGS
+    G4int    num_rings_;
+    G4double ring_width_;
+    G4double strut_width_;
+    G4double ring_thickness_;
+    G4double strut_thickness_;
+    G4int    num_struts_;
 
     // FIBERS
     G4double fiber_thickness_;
@@ -168,6 +177,10 @@ namespace nexus {
     G4Material* fiber_mat_;
     G4Material* iClad_mat_;
     G4Material* oClad_mat_;
+    G4Material* coating_mat_;
+    G4String    ring_mat_name_;
+    G4Material* ring_mat_;
+    G4Material* strut_mat_;
 
     // Sensor IDs
     G4int first_left_sensor_id_;

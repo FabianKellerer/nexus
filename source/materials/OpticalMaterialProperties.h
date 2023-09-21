@@ -24,7 +24,11 @@ namespace opticalprops {
 
   G4MaterialPropertiesTable* Vacuum();
 
+  G4MaterialPropertiesTable* Air();
+
   G4MaterialPropertiesTable* GlassEpoxy();
+
+  G4MaterialPropertiesTable* HamamatsuEpoxy();
 
   G4MaterialPropertiesTable* FusedSilica();
 
@@ -49,6 +53,18 @@ namespace opticalprops {
 
   G4MaterialPropertiesTable* LXe();
 
+  G4MaterialPropertiesTable* LAr();
+
+  G4MaterialPropertiesTable* PTP();
+
+  G4MaterialPropertiesTable* LArPTPArtifact();
+
+  G4MaterialPropertiesTable* PerfectPhotonCollector();
+
+  G4MaterialPropertiesTable* PerfectPhotonReflector();
+
+  G4MaterialPropertiesTable* PerfectPolishedSurfaceTransmitter();
+
   G4MaterialPropertiesTable* FakeGrid(G4double pressure=1.*bar,
                                       G4double temperature=STP_Temperature,
                                       G4double transparency=.9,
@@ -63,13 +79,29 @@ namespace opticalprops {
 
   G4MaterialPropertiesTable* TPH();
 
+  G4MaterialPropertiesTable* PerfectAbsorber();
+
   G4MaterialPropertiesTable* PTFE();
+
+  G4MaterialPropertiesTable* PolishedAl();
+
+  G4MaterialPropertiesTable* Cu();
 
   G4MaterialPropertiesTable* EJ280();
 
-  G4MaterialPropertiesTable* EJ286();
+  G4MaterialPropertiesTable* EJ282();
+
+  G4MaterialPropertiesTable* EJ286(G4double attenuation_length=1.*m);
+
+  G4MaterialPropertiesTable* BCF92(G4double minAbsLength);
+
+  G4MaterialPropertiesTable* G2P_FB118(G4double attenuation_length);
+
+  G4MaterialPropertiesTable* SCHOTT_B270();
 
   G4MaterialPropertiesTable* Y11();
+
+  G4MaterialPropertiesTable* B2();
 
   G4MaterialPropertiesTable* Pethylene();
 
@@ -79,6 +111,11 @@ namespace opticalprops {
 
   G4MaterialPropertiesTable* XXX();
 
+  G4MaterialPropertiesTable* specularspikeVIKUITI();
+
+  G4MaterialPropertiesTable* specularlobeVIKUITI();
+
+  G4MaterialPropertiesTable* diffusiveVIKUITI();
 
   constexpr G4double optPhotMinE_ =  0.2  * eV;
   constexpr G4double optPhotMaxE_ = 11.5  * eV;

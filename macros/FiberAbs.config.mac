@@ -1,0 +1,23 @@
+/run/verbose 1
+/event/verbose 0
+/tracking/verbose 0
+/process/em/verbose 0
+
+/Geometry/FiberAbsorption/lambdawls 0.3 mm
+
+/Generator/SingleParticle/particle opticalphoton
+/Generator/SingleParticle/min_energy 2.88 eV        ##7.08 eV for 175 nm or 2.76 eV for 450 nm blue light
+/Generator/SingleParticle/max_energy 2.88 eV
+/Generator/SingleParticle/min_costheta 0
+/Generator/SingleParticle/max_costheta 0
+/Generator/SingleParticle/min_phi 3.14159
+/Generator/SingleParticle/max_phi 3.14159
+
+/process/optical/processActivation Cerenkov false
+
+### PHYSICS
+/PhysicsList/Nexus/clustering           true
+/PhysicsList/Nexus/drift                true
+/PhysicsList/Nexus/electroluminescence  true
+
+/nexus/persistency/outputFile FiberAbs.next

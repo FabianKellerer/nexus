@@ -1,12 +1,3 @@
-## ----------------------------------------------------------------------------
-## nexus | nexus_OpticalFibre.init.mac
-##
-## Initialization macro to simulate photons
-## along an optical fibre.
-##
-## The NEXT Collaboration
-## ----------------------------------------------------------------------------
-
 /PhysicsList/RegisterPhysics G4EmStandardPhysics_option4
 /PhysicsList/RegisterPhysics G4DecayPhysics
 /PhysicsList/RegisterPhysics G4RadioactiveDecayPhysics
@@ -14,7 +5,7 @@
 /PhysicsList/RegisterPhysics NexusPhysics
 /PhysicsList/RegisterPhysics G4StepLimiterPhysics
 
-/nexus/RegisterGeometry OpticalFibre
+/nexus/RegisterGeometry PMTcalib
 
 /nexus/RegisterGenerator SingleParticleGenerator
 
@@ -25,4 +16,4 @@
 /nexus/RegisterTrackingAction OpticalTrackingAction
 /nexus/RegisterSteppingAction AnalysisSteppingAction
 
-/nexus/RegisterMacro macros/nexus_OpticalFibre.config.mac
+/nexus/RegisterMacro macros/PMTcalib.config.mac

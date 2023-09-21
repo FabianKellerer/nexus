@@ -1,0 +1,31 @@
+/run/verbose 1
+/event/verbose 0
+/tracking/verbose 0
+/process/em/verbose 0
+
+/Geometry/XArapuca/surrounding_media air
+/Geometry/XArapuca/DFA_thickn 1.5 mm
+/Geometry/XArapuca/gap 0 mm
+/Geometry/XArapuca/only_sipms_along_long_sides true
+/Geometry/XArapuca/df_no_along_wlsplength 6
+/Geometry/XArapuca/df_no_along_wlspwidth 1
+/Geometry/XArapuca/path_to_inwards_dichroic_data  /Users/fabian/Documents/g4_dichroic_data_from_SCHOTTB270
+/Geometry/XArapuca/path_to_outwards_dichroic_data /Users/fabian/Documents/g4_dichroic_data_from_SCHOTTB270
+
+/Generator/SingleParticle/particle opticalphoton
+#/Generator/SingleParticle/region LAMP               ##BODY_VOL or LAMP
+/Generator/SingleParticle/min_energy 6  eV        ##7.08 eV for 175 nm or 2.76 eV for 450 nm blue light
+/Generator/SingleParticle/max_energy 10 eV
+/Generator/SingleParticle/min_costheta 0
+/Generator/SingleParticle/max_costheta 0
+/Generator/SingleParticle/min_phi -90
+/Generator/SingleParticle/max_phi -90
+
+/process/optical/processActivation Cerenkov false
+
+### PHYSICS
+/PhysicsList/Nexus/clustering           true
+/PhysicsList/Nexus/drift                true
+/PhysicsList/Nexus/electroluminescence  true
+
+/nexus/persistency/outputFile xarapuca.next

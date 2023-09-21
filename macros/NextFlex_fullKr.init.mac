@@ -13,6 +13,7 @@
 
 ### GENERATOR
 /nexus/RegisterGenerator Kr83mGenerator
+#/nexus/RegisterGenerator SingleParticleGenerator
 
 
 ### PERSISTENCY MANAGER
@@ -22,7 +23,7 @@
 ### ACTIONS
 /nexus/RegisterRunAction      DefaultRunAction
 /nexus/RegisterEventAction    DefaultEventAction
-/nexus/RegisterTrackingAction DefaultTrackingAction
+/nexus/RegisterTrackingAction OpticalTrackingAction
 /nexus/RegisterSteppingAction AnalysisSteppingAction
 
 

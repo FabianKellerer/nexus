@@ -63,6 +63,12 @@ namespace materials {
   // Stainless steel grade 316Ti
   G4Material* Steel316Ti();
 
+  // Polished Aluminium
+  G4Material* PolishedAl();
+
+  // Copper
+  G4Material* Cu();
+
   // Epoxy resin
   G4Material* Epoxy();
 

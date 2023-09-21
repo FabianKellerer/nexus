@@ -70,6 +70,9 @@ namespace nexus {
     // Visibility of the geometry
     G4bool ics_visibility_;
 
+    // Symmetric TPC
+    G4bool symmetric_;
+
     // Messenger for the definition of control commands
     G4GenericMessenger* msg_;
 
@@ -90,6 +93,7 @@ namespace nexus {
     NextFlexFieldCage*     field_cage_;
     NextFlexEnergyPlane*   energy_plane_;
     NextFlexTrackingPlane* tracking_plane_;
+    NextFlexTrackingPlane* tracking_plane_2_;
 
     // Vertex generators
     CylinderPointSampler2020* copper_gen_;

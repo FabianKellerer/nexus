@@ -14,6 +14,7 @@
 #include "IonizationSD.h"
 #include "UniformElectricDriftField.h"
 #include "CylinderPointSampler2020.h"
+#include "GenericWLSFiber.h"
 #include "GenericPhotosensor.h"
 #include "SensorSD.h"
 #include "Visibilities.h"
@@ -33,6 +34,7 @@
 #include <G4LogicalBorderSurface.hh>
 #include <G4UserLimits.hh>
 #include <G4Transform3D.hh>
+#include <Randomize.hh>
 
 
 using namespace nexus;
@@ -43,6 +45,7 @@ NextFlexFieldCage::NextFlexFieldCage():
   mother_logic_            (nullptr),
   verbosity_               (false),
   visibility_              (false),
+  fiber_visibility_        (false),
   fiber_sensor_visibility_ (false),
   msg_                     (nullptr),
   fc_with_fibers_          (true),
@@ -57,9 +60,19 @@ NextFlexFieldCage::NextFlexFieldCage():
   el_field_int_            (16.0 * kilovolt/cm), // EL field intensity
   el_transv_diff_          (0. * mm/sqrt(cm)),   // EL field transversal diffusion
   el_long_diff_            (0. * mm/sqrt(cm)),   // EL field longitudinal diffusion
+  light_tube_              (true),               // Whether to build the light tube or the field cage rings
+  num_rings_               (45),                  // Number of field cage rings
+  num_struts_              (20),
+  ring_width_              (5.*mm),              // Width of field cage rings (Along active volume)
+  ring_thickness_          (5.*mm),              // Thickness of field cage rings (radial direction)
+  strut_thickness_         (1.*mm),              // Thickness of the field cage struts
+  strut_width_             (5.*mm),
+  ring_mat_name_           ("Cu"),       // Material of field cage rings
   anode_transparency_      (0.95),               // Anode transparency
   gate_transparency_       (0.95),               // Gate transparency
   photoe_prob_             (0),                  // OpticalPhotoElectric Probability
+  fiber_thickness_         (2. * mm),            // Fiber thickness
+  fiber_shape_             ("round"),            // Fiber shape ("round" or "square")
   fiber_claddings_         (2),                  // Number of fiber claddings (0, 1 or 2)
   fiber_sensor_binning_    (100. * ns),          // Size of fiber sensors time binning
   wls_mat_name_            ("TPB"),              // UV wls material name
@@ -90,7 +103,6 @@ NextFlexFieldCage::NextFlexFieldCage():
   light_tube_thickness_   = 5.   * mm;
   wls_thickness_          = 1.   * um;
 
-  fiber_thickness_        = 2.  * mm;
   cladding_perc_          = 0.02;       // Fiber thickness perc devoted to each cladding
   fiber_extra_length_     = 2.  * cm;   // Extra length per side of fibers respect FC length
   fiber_light_tube_gap_   = 2.  * mm;   // Separation gap between fibers & light tube
@@ -121,6 +133,9 @@ void NextFlexFieldCage::DefineConfigurationParameters()
 
   // Visibilities
   msg_->DeclareProperty("fc_visibility", visibility_, "FIELD_CAGE visibility");
+
+  msg_->DeclareProperty("fiber_visibility", fiber_visibility_,
+                        "Fibers visibility");
 
   msg_->DeclareProperty("fiber_sensor_visibility", fiber_sensor_visibility_,
                         "Fiber sensors visibility");
@@ -172,7 +187,7 @@ void NextFlexFieldCage::DefineConfigurationParameters()
   el_gap_length_cmd.SetRange("el_gap_length>=0.");
 
   msg_->DeclareProperty("el_field_on", el_field_on_,
-                        "true for full simulation), false if fast or parametrized.");
+                        "true for full simulation, false if fast or parametrized.");
 
   G4GenericMessenger::Command& el_field_int_cmd =
     msg_->DeclareProperty("el_field_int", el_field_int_,
@@ -191,6 +206,20 @@ void NextFlexFieldCage::DefineConfigurationParameters()
                           "Longitudinal diffusion in the EL region");
   el_long_diff_cmd.SetParameterName("el_long_diff", false);
   el_long_diff_cmd.SetUnitCategory("Diffusion");
+
+  msg_->DeclareProperty("light_tube", light_tube_, "Build light tube");
+
+  msg_->DeclareProperty("num_rings", num_rings_, "Number of field cage rings");
+
+  msg_->DeclareProperty("ring_width", ring_width_, "Width of the field cage rings");
+
+  msg_->DeclareProperty("ring_thickness", ring_thickness_, "Radial thickness of field cage rings");
+
+  msg_->DeclareProperty("num_struts", num_struts_, "Number of axial struts of the field cage");
+
+  msg_->DeclareProperty("strut_thickness", strut_thickness_, "Thickness of the struts (radial)");
+
+  msg_->DeclareProperty("strut_width", strut_width_, "Width of the struts (polar)");
 
   // TRANSPARENCIES
   msg_->DeclareProperty("cathode_transparency", cathode_transparency_,
@@ -211,13 +240,22 @@ void NextFlexFieldCage::DefineConfigurationParameters()
                         "FIELD_CAGE UV wavelength shifting material name");
 
   // FIBERS
-  msg_->DeclareProperty("fiber_mat", fiber_mat_name_, "Fiber core material.");
+
+  G4GenericMessenger::Command& fiber_thickness_cmd =
+    msg_->DeclareProperty("fiber_thickness", fiber_thickness_,
+                          "Fiber thickness");
+  fiber_thickness_cmd.SetParameterName("fiber_thickness", false);
+  fiber_thickness_cmd.SetRange("fiber_thickness>=0.");
+
+  msg_->DeclareProperty("fiber_shape", fiber_shape_, "Fiber shape.");
 
   G4GenericMessenger::Command& fiber_claddings_cmd =
     msg_->DeclareProperty("fiber_claddings", fiber_claddings_,
                           "Number of fiber claddings.");
   fiber_claddings_cmd.SetParameterName("fiber_claddings", false);
   fiber_claddings_cmd.SetRange("fiber_claddings>=0 && fiber_claddings<=2");
+
+  msg_->DeclareProperty("fiber_mat", fiber_mat_name_, "Fiber core material.");
 
   G4GenericMessenger::Command& fiber_sensor_binning_cmd =
     msg_->DeclareProperty("fiber_sensor_time_binning", fiber_sensor_binning_,
@@ -274,6 +312,9 @@ void NextFlexFieldCage::ComputeDimensions()
     light_tube_inner_rad_ += fiber_thickness_;
     light_tube_inner_rad_ += fiber_light_tube_gap_;
   }
+  //if (!light_tube_) {
+  //  active_diam_ += 2*ring_thickness_;
+  //}
 }
 
 
@@ -334,7 +375,7 @@ void NextFlexFieldCage::DefineMaterials()
     fiber_mat_->SetMaterialPropertiesTable(opticalprops::EJ280());
   }
   else if (fiber_mat_name_ == "EJ286") {
-    fiber_mat_ = materials::PVT();   // Same base material than EJ280
+    fiber_mat_ = materials::PVT();   // Same base material than PVT
     fiber_mat_->SetMaterialPropertiesTable(opticalprops::EJ286());
   }
   else if (fiber_mat_name_ == "Y11") {
@@ -352,6 +393,19 @@ void NextFlexFieldCage::DefineMaterials()
 
   iClad_mat_ = materials::PMMA();
   iClad_mat_->SetMaterialPropertiesTable(opticalprops::PMMA());
+
+  // Fiber WLS coating materials (hardcoded for now)
+  coating_mat_ = materials::TPB();
+  coating_mat_ -> SetMaterialPropertiesTable(opticalprops::TPB());
+
+  // Field cage rings material
+  if (ring_mat_name_ == "Cu") {
+    //ring_mat_ = G4NistManager::Instance()->FindOrBuildMaterial("G4_Cu");
+    //ring_mat_->SetMaterialPropertiesTable(new G4MaterialPropertiesTable());
+    ring_mat_ = materials::Cu();
+    ring_mat_->SetMaterialPropertiesTable(opticalprops::Cu());
+  }
+  strut_mat_ = materials::HDPE();
 }
 
 
@@ -387,13 +441,12 @@ void NextFlexFieldCage::Construct()
 
   BuildELgap();
 
-  BuildLightTube();
+  if(light_tube_) BuildLightTube();
+  else BuildFieldCageRings();
 
-  // If with fibers, build fibers and corresponding detectors
-  if (fc_with_fibers_) {
-    BuildFibers();
-    BuildFiberSensors();
-  }
+  // If with fibers, build fibers and corresponding sensors
+  if (fc_with_fibers_) BuildFibersAndSensors();    
+
 }
 
 
@@ -732,158 +785,141 @@ void NextFlexFieldCage::BuildLightTube()
 }
 
 
-
-void NextFlexFieldCage::BuildFibers()
+void NextFlexFieldCage::BuildFieldCageRings()
 {
-  // Number of fibers
-  num_fibers_   = (G4int) (twopi * fiber_inner_rad_ / fiber_thickness_);
 
-  // Radius of the different volumes being built
-  G4double inner_rad    = fiber_inner_rad_;
-  G4double outer_rad    = fiber_inner_rad_ + fiber_thickness_;
+  G4double ring_gap_width_  = (active_length_-num_rings_*ring_width_)/(num_rings_-1);
+  G4double strut_phi_       = twopi/num_struts_;
 
-  // Lengths & positions
+  G4Tubs* fc_gas_solid = 
+    new G4Tubs("FC_GAS", active_diam_/2, active_diam_/2+strut_thickness_+ring_thickness_, fc_length_/2, 0, twopi);
+
+  G4LogicalVolume* fc_gas_logic = 
+    new G4LogicalVolume(fc_gas_solid, xenon_gas_, "FC_GAS");
+
+  G4VPhysicalVolume* fc_gas_phys = 
+    new G4PVPlacement(nullptr, G4ThreeVector(0, 0, fc_length_/2), fc_gas_logic,
+      fc_gas_logic->GetName(), mother_logic_, true, 0, true);
+
+  G4Tubs* strut_solid = 
+    new G4Tubs("FC_STRUT", active_diam_/2, active_diam_/2+strut_thickness_, fc_length_/2, 0, strut_width_/active_diam_);
+
+  G4LogicalVolume* strut_logic = 
+    new G4LogicalVolume(strut_solid, strut_mat_, "FC_STRUT");
+
+  G4Tubs* ring_solid =
+    new G4Tubs("FC_RING", active_diam_/2+strut_thickness_, active_diam_/2+ring_thickness_+strut_thickness_,
+               ring_width_/2, 0, twopi);
+
+  G4LogicalVolume* ring_logic =
+    new G4LogicalVolume(ring_solid, ring_mat_, "FC_RING");
+
+
+  for (G4int ring_id=0; ring_id<num_rings_; ring_id++) {
+    G4double ring_posz_ = ring_id*ring_gap_width_+(2*ring_id+1)*ring_width_/2 - fc_length_/2;
+
+    G4VPhysicalVolume* ring_phys =
+      new G4PVPlacement(nullptr, G4ThreeVector(0., 0., ring_posz_), ring_logic,
+                      ring_logic->GetName(), fc_gas_logic, true, ring_id, true);
+  }
+
+  G4RotationMatrix strut_rot;
+  for (G4int strut_id=0; strut_id<num_struts_; strut_id++){
+    G4double phi = strut_id * strut_phi_;
+    if (strut_id > 0) strut_rot.rotateZ(-strut_phi_);
+
+    G4ThreeVector strut_pos = G4ThreeVector(sin(phi),
+                                            cos(phi),
+                                            0);
+
+
+    new G4PVPlacement(G4Transform3D(strut_rot, strut_pos), strut_logic,
+                      strut_logic->GetName(), fc_gas_logic, true,
+                      strut_id, true);
+
+    // Adding the optical surface
+    G4OpticalSurface* strut_optSurf =
+      new G4OpticalSurface("FC_STRUT", unified, ground, dielectric_metal);
+    strut_optSurf->SetMaterialPropertiesTable(opticalprops::PTFE());
+
+  new G4LogicalSkinSurface("FC_STRUT", strut_logic, strut_optSurf);
+  }
+
+  G4Tubs* light_detector = new G4Tubs("LIGHT_DET",active_diam_/2+ring_thickness_+strut_thickness_,
+              active_diam_/2+ring_thickness_+strut_thickness_+1.*cm,
+              1.03*fc_length_/2., 0, twopi);
+
+  G4LogicalVolume* light_det_logic = 
+    new G4LogicalVolume(light_detector,materials::FR4(),"LIGHT_DET");
+  
+  G4VPhysicalVolume* det_phys = 
+    new G4PVPlacement(nullptr,G4ThreeVector(0., 0., fc_length_/2), light_det_logic,
+                light_det_logic->GetName(),mother_logic_,false,0,true);
+
+  // Sensitive detector
+  SensorSD* pmtsd = new SensorSD("/XARAPUCA");
+  pmtsd->SetDetectorVolumeDepth(2);
+  pmtsd->SetTimeBinning(1.*nanosecond);
+  G4SDManager::GetSDMpointer()->AddNewDetector(pmtsd);
+  light_det_logic->SetSensitiveDetector(pmtsd);
+
+  G4double energy[]       = {0.2 * eV, 3.5 * eV, 3.6 * eV, 11.5 * eV};
+  G4double reflectivity[] = {0.0     , 0.0     , 0.0     ,  0.0     };
+  G4double efficiency[]   = {1.0     , 1.0     , 1.0     ,  1.0     };
+  G4MaterialPropertiesTable* ara_mpt = new G4MaterialPropertiesTable();
+  ara_mpt->AddProperty("EFFICIENCY", energy, efficiency, 4);
+  ara_mpt->AddProperty("REFLECTIVITY", energy, reflectivity, 4);
+
+  G4OpticalSurface* ara_opsur =
+    new G4OpticalSurface("LIGHT_DET", unified, polished, dielectric_metal);
+  ara_opsur->SetMaterialPropertiesTable(ara_mpt);
+
+  new G4LogicalSkinSurface("LIGHT_DET", light_det_logic, ara_opsur);
+}
+
+
+void NextFlexFieldCage::BuildFibersAndSensors()
+{
+  /// The fibers ///
+  // Num fibers
+  num_fibers_ = (G4int) (twopi * fiber_inner_rad_ / fiber_thickness_);
+  G4double fiber_phi = twopi / num_fibers_;
+
+  // Fiber lengths & positions
   G4double fiber_length = fc_length_ +  2. * fiber_extra_length_;
   fiber_iniZ_           = - el_gap_length_ - fiber_extra_length_;
   fiber_finZ_           = fiber_iniZ_ + fiber_length;
   G4double fiber_posZ   = fiber_iniZ_ + fiber_length/2.;
+  G4double fiber_rad    = fiber_inner_rad_ + fiber_thickness_/2.;
 
-  // Most out / inn volumes
-  G4LogicalVolume* out_logic_volume = mother_logic_;
-  G4LogicalVolume* inn_logic_volume = mother_logic_;
+  // Building the fiber
+  G4bool with_coating = true;
+  GenericWLSFiber* fiber =
+    new GenericWLSFiber("FIBER", fiber_shape_, fiber_thickness_,
+                        fiber_length, fiber_claddings_, with_coating,
+                        coating_mat_, fiber_mat_, fiber_visibility_);
+  fiber->Construct();
+  G4LogicalVolume* fiber_logic = fiber->GetLogicalVolume();
 
-  /// Outer Cladding ///
-  if (fiber_claddings_ >= 2) {
+  // Placing the fibers
+  G4RotationMatrix fiber_rot;
+  for (G4int fiber_id=0; fiber_id < num_fibers_; fiber_id++) {
+    G4double phi = fiber_id * fiber_phi;
+    if (fiber_id > 0) fiber_rot.rotateZ(-fiber_phi);
 
-    G4String oClad_name = "FIBER_OCLAD";
+    G4ThreeVector fiber_pos = G4ThreeVector(fiber_rad * sin(phi),
+                                            fiber_rad * cos(phi),
+                                            fiber_posZ);
 
-    G4Tubs* oClad_solid =
-      new G4Tubs(oClad_name, inner_rad, outer_rad, fiber_length/2.,
-                 0., 360.*deg);
+    //if (verbosity_) G4cout << "* Fiber " << fiber_id << " position: "
+    //                       << fiber_pos << G4endl;    
 
-    G4LogicalVolume* oClad_logic =
-      new G4LogicalVolume(oClad_solid, oClad_mat_, oClad_name);
-
-    new G4PVPlacement(nullptr, G4ThreeVector(0.,0.,fiber_posZ),
-                      oClad_logic, oClad_name, inn_logic_volume,
-                      false, 0, verbosity_);
-
-    // Visibility
-    oClad_logic->SetVisAttributes(G4VisAttributes::GetInvisible());
-
-    // Updating info
-    out_logic_volume = oClad_logic;
-    inn_logic_volume = oClad_logic;
-    fiber_posZ       = 0.;
-    inner_rad       += fiber_thickness_ * cladding_perc_;
-    outer_rad       -= fiber_thickness_ * cladding_perc_;
+    new G4PVPlacement(G4Transform3D(fiber_rot, fiber_pos), fiber_logic,
+                      fiber_logic->GetName(), mother_logic_, true,
+                      fiber_id, false);
   }
 
-
-  /// Inner Cladding ///
-  if (fiber_claddings_ >= 1) {
-
-    G4String iClad_name = "FIBER_ICLAD";
-    if (fiber_claddings_ == 1) iClad_name = "FIBER_CLAD";
-
-    G4Tubs* iClad_solid =
-      new G4Tubs(iClad_name, inner_rad, outer_rad, fiber_length/2.,
-                 0., 360.*deg);
-
-    G4LogicalVolume* iClad_logic =
-      new G4LogicalVolume(iClad_solid, iClad_mat_, iClad_name);
-
-    new G4PVPlacement(nullptr, G4ThreeVector(0.,0.,fiber_posZ),
-                      iClad_logic, iClad_name, inn_logic_volume,
-                      false, 0, verbosity_);
-
-    // Visibility
-    iClad_logic->SetVisAttributes(G4VisAttributes::GetInvisible());
-
-    // Updating info
-    if (fiber_claddings_ == 1) out_logic_volume = iClad_logic;
-    inn_logic_volume = iClad_logic;
-    fiber_posZ       = 0.;
-    inner_rad       += fiber_thickness_ * cladding_perc_;
-    outer_rad       -= fiber_thickness_ * cladding_perc_;
-  }
-
-
-  /// Fiber core ///
-  G4String core_name = "FIBER_CORE";
-
-  G4Tubs* core_solid =
-    new G4Tubs(core_name, inner_rad, outer_rad, fiber_length/2.,
-               0., 360.*deg);
-
-  G4LogicalVolume* core_logic =
-    new G4LogicalVolume(core_solid, fiber_mat_, core_name);
-
-  new G4PVPlacement(nullptr, G4ThreeVector(0.,0.,fiber_posZ),
-                    core_logic, core_name, inn_logic_volume,
-                    false, 0, verbosity_);
-
-  // Visibility
-  if (visibility_) core_logic->SetVisAttributes(nexus::LightGreen());
-  else             core_logic->SetVisAttributes(G4VisAttributes::GetInvisible());
-
-  // Updating info
-  if (fiber_claddings_ == 0) out_logic_volume = core_logic;
-
-  // Vertex generator
-  fiber_gen_ = new CylinderPointSampler2020(inner_rad, outer_rad, fiber_length/2., 0., twopi, nullptr,
-                                            G4ThreeVector(0., 0., fiber_iniZ_ + fiber_length/2.));
-
-
-  /// The UV wavelength Shifter in FIBERS ///
-  // The inner WLS
-  G4String fiber_iWls_name = "FIBER_IWLS";
-
-  G4double fiber_iWls_inner_rad = fiber_inner_rad_;
-  G4double fiber_iWls_outer_rad = fiber_iWls_inner_rad + wls_thickness_;
-
-  G4Tubs* fiber_iWls_solid =
-    new G4Tubs(fiber_iWls_name, fiber_iWls_inner_rad, fiber_iWls_outer_rad,
-               fiber_length/2., 0, twopi);
-
-  G4LogicalVolume* fiber_iWls_logic =
-    new G4LogicalVolume(fiber_iWls_solid, wls_mat_, fiber_iWls_name);
-
-  new G4PVPlacement(nullptr, G4ThreeVector(0., 0., 0.), fiber_iWls_logic,
-                    fiber_iWls_name, out_logic_volume, false, 0, verbosity_);
-
-  // The outer WLS
-  G4String fiber_oWls_name = "FIBER_OWLS";
-
-  G4double fiber_oWls_outer_rad = fiber_inner_rad_ + fiber_thickness_;;
-  G4double fiber_oWls_inner_rad = fiber_oWls_outer_rad - wls_thickness_;
-
-  G4Tubs* fiber_oWls_solid =
-    new G4Tubs(fiber_oWls_name, fiber_oWls_inner_rad, fiber_oWls_outer_rad,
-               fiber_length/2., 0, twopi);
-
-  G4LogicalVolume* fiber_oWls_logic =
-    new G4LogicalVolume(fiber_oWls_solid, wls_mat_, fiber_oWls_name);
-
-  new G4PVPlacement(nullptr, G4ThreeVector(0., 0., 0.), fiber_oWls_logic,
-                    fiber_oWls_name, out_logic_volume, false, 0, verbosity_);
-
-  // Visibilities
-  fiber_iWls_logic->SetVisAttributes(G4VisAttributes::GetInvisible());
-  fiber_oWls_logic->SetVisAttributes(G4VisAttributes::GetInvisible());
-
-  // Optical surfaces
-  G4OpticalSurface* fiber_wls_optSurf =
-    new G4OpticalSurface("FIBER_WLS_OPSURF", glisur, ground,
-                         dielectric_dielectric, .01);
-
-  new G4LogicalSkinSurface(fiber_iWls_name, fiber_iWls_logic,
-                           fiber_wls_optSurf);
-
-  new G4LogicalSkinSurface(fiber_oWls_name, fiber_oWls_logic,
-                           fiber_wls_optSurf);
-
-  /// Verbosity ///
+  // Verbosity
   if (verbosity_) {
     G4cout << "* Number of fibers: " << num_fibers_ << G4endl;
     G4cout << "* Fiber.  Inner Rad: " << fiber_inner_rad_ <<
@@ -891,19 +927,11 @@ void NextFlexFieldCage::BuildFibers()
     G4cout << "* Fiber Z positions: " << fiber_iniZ_ <<
               " to " << fiber_finZ_ << G4endl;
   }
-}
 
-
-
-void NextFlexFieldCage::BuildFiberSensors()
-{
-  // Num fiber sesnors per plane
+  /// The fiber sensors ///
+  // Num fiber sensors per plane
   num_fiber_sensors_ = (G4int) (twopi * fiber_inner_rad_ / fiber_sensor_size_);
   G4double fiber_sensor_phi = twopi / num_fiber_sensors_;
-
-  if (num_fibers_ != num_fiber_sensors_)
-    G4cout << "* WARNING::BuildFiberSensors - Different sizes of fibers and their sensors"
-           << G4endl;
 
   // Positions to place the sensors
   G4double sensor_rad        = fiber_inner_rad_ + fiber_sensor_size_/2.;
@@ -950,7 +978,7 @@ void NextFlexFieldCage::BuildFiberSensors()
   G4LogicalVolume* left_sensor_logic  = left_sensor_ ->GetLogicalVolume();
   G4LogicalVolume* right_sensor_logic = right_sensor_->GetLogicalVolume();
 
-  /// Placing the sensors
+  // Placing the sensors
   G4RotationMatrix sensor_left_rot;
   G4RotationMatrix sensor_right_rot;
   sensor_right_rot.rotateY(pi);
@@ -966,8 +994,8 @@ void NextFlexFieldCage::BuildFiberSensors()
                                                 sensor_rad * cos(phi),
                                                 sensor_left_posZ);
 
-    if (verbosity_) G4cout << "* Left  fiber sensor " << first_left_sensor_id_ + sensor_id
-                           << " position: " << case_left_pos << G4endl;
+    //if (verbosity_) G4cout << "* Left  fiber sensor " << first_left_sensor_id_ + sensor_id
+    //                       << " position: " << case_left_pos << G4endl;
 
     new G4PVPlacement(G4Transform3D(sensor_left_rot, case_left_pos), left_sensor_logic,
                       left_sensor_logic->GetName(), mother_logic_, true,
@@ -980,8 +1008,8 @@ void NextFlexFieldCage::BuildFiberSensors()
                                                  sensor_rad * cos(phi),
                                                  sensor_right_posZ);
 
-    if (verbosity_) G4cout << "* Right fiber sensor " << first_right_sensor_id_ + sensor_id
-                           << " position: " << case_right_pos << G4endl;
+    //if (verbosity_) G4cout << "* Right fiber sensor " << first_right_sensor_id_ + sensor_id
+    //                       << " position: " << case_right_pos << G4endl;
 
     new G4PVPlacement(G4Transform3D(sensor_right_rot, case_right_pos), right_sensor_logic,
                                     right_sensor_logic->GetName(), mother_logic_, true,
@@ -990,6 +1018,7 @@ void NextFlexFieldCage::BuildFiberSensors()
 
   /// Verbosity
   if (verbosity_) {
+    G4cout << "* Num fibers : " << num_fibers_ << G4endl;
     G4cout << "* Num fiber sensors   : " << num_fiber_sensors_ << " * 2" << G4endl;
     G4cout << "* Num fibers / sensor : "
            << 1. * num_fibers_ / num_fiber_sensors_ << G4endl;
@@ -1022,7 +1051,17 @@ G4ThreeVector NextFlexFieldCage::GenerateVertex(const G4String& region) const
     vertex = light_tube_gen_->GenerateVertex("VOLUME");
   }
   else if (region == "FIBER_CORE") {
-    if (fc_with_fibers_) vertex = fiber_gen_->GenerateVertex("VOLUME");
+    if (fc_with_fibers_) {
+      G4int num_fibers_ = (G4int) (twopi * fiber_inner_rad_ / fiber_thickness_);
+      G4int fiber_num = G4RandFlat::shootInt((long) 0, num_fibers_);
+      G4double fiber_phi = twopi / num_fibers_;
+      G4ThreeVector fiber_pos = G4ThreeVector((fiber_inner_rad_ + fiber_thickness_/2.) * sin(fiber_num*fiber_phi),
+                                              (fiber_inner_rad_ + fiber_thickness_/2.) * cos(fiber_num*fiber_phi),
+                                              fiber_iniZ_ + (fc_length_+2. * fiber_extra_length_)/2.);
+      CylinderPointSampler2020* fiber_gen_ = new CylinderPointSampler2020(0,fiber_thickness_/2.,(fc_length_+2. * fiber_extra_length_)/2.,0,twopi,
+        nullptr,fiber_pos);
+      vertex = fiber_gen_->GenerateVertex("VOLUME");
+      }
     else
       G4Exception("[NextFlexFieldCage]", "GenerateVertex()", FatalException,
               "Trying to generate Vertices in NON-existing fibers");

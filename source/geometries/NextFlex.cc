@@ -43,6 +43,7 @@ NextFlex::NextFlex():
   GeometryBase(),
   verbosity_         (false),
   ics_visibility_    (false),
+  symmetric_         (false),
   msg_               (nullptr),
   gas_name_          ("enrichedXe"),
   gas_pressure_      (15.  * bar),
@@ -71,6 +72,8 @@ NextFlex::NextFlex():
 
   // Tracking Plane
   tracking_plane_ = new NextFlexTrackingPlane();
+
+  tracking_plane_2_ = new NextFlexTrackingPlane();
 }
 
 
@@ -134,6 +137,8 @@ void NextFlex::DefineConfigurationParameters()
   ics_thickness_cmd.SetRange("ics_thickness>=0.");
 
   msg_->DeclareProperty("ics_visibility", ics_visibility_, "ICS Visibility");
+
+  msg_->DeclareProperty("symmetric", symmetric_, "Symmetry");
 }
 
 
@@ -221,12 +226,21 @@ void NextFlex::Construct()
   field_cage_->Construct();
 
   // Energy Plane
-  energy_plane_->SetMotherLogicalVolume(gas_logic_vol);
-  energy_plane_->SetNeighGasPhysicalVolume(field_cage_->Get_BUFFER_phys());
-  energy_plane_->SetDiameter(field_cage_->Get_ACTIVE_diam());
-  energy_plane_->SetOriginZ(field_cage_->Get_BUFFER_finalZ());
-  energy_plane_->SetFirstSensorID(FIRST_ENERGY_SENSOR_ID);
-  energy_plane_->Construct();
+  if(!symmetric_) {
+    energy_plane_->SetMotherLogicalVolume(gas_logic_vol);
+    energy_plane_->SetNeighGasPhysicalVolume(field_cage_->Get_BUFFER_phys());
+    energy_plane_->SetDiameter(field_cage_->Get_ACTIVE_diam());
+    energy_plane_->SetOriginZ(field_cage_->Get_BUFFER_finalZ());
+    energy_plane_->SetFirstSensorID(FIRST_ENERGY_SENSOR_ID);
+    energy_plane_->Construct();
+  } else {
+    tracking_plane_2_->SetMotherLogicalVolume(gas_logic_vol);
+    tracking_plane_2_->SetNeighGasPhysicalVolume(gas_phys_vol);
+    tracking_plane_2_->SetDiameter(field_cage_->Get_ACTIVE_diam());
+    tracking_plane_2_->SetOriginZ(field_cage_->Get_BUFFER_finalZ());
+    tracking_plane_2_->SetFirstSensorID(FIRST_ENERGY_SENSOR_ID);
+    tracking_plane_2_->Construct();
+  }
 
   // Tracking Plane
   tracking_plane_->SetMotherLogicalVolume(gas_logic_vol);
