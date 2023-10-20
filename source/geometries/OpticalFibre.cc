@@ -114,8 +114,9 @@ void OpticalFibre::Construct()
         ylab = (sqrt(num_fibers_))*(2*radius_+fiber_dist_)-fiber_dist_;
     } 
     else {
-        xlab = 25.4*mm;//2*radius_;
+        xlab = 25.4*mm;
         ylab = (num_fibers_)*(2*radius_+fiber_dist_)-fiber_dist_+puffer;
+        if (ylab<xlab) ylab = xlab;
     }
 
 G4Box* lab_solid = new G4Box("LAB", xlab,ylab,length_+gap_+1.*cm);

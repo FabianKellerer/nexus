@@ -12,18 +12,18 @@
 /tracking/verbose 0
 /process/em/verbose 0
 
-/Geometry/OpticalFibre/length 11. cm
+/Geometry/OpticalFibre/length 500. cm
 /Geometry/OpticalFibre/radius 1 mm
-/Geometry/OpticalFibre/core_mat "BCF92"
-/Geometry/OpticalFibre/num_fibers 5
+/Geometry/OpticalFibre/core_mat "Y11"
+/Geometry/OpticalFibre/num_fibers 1
 /Geometry/OpticalFibre/fiber_dist 3 mm
-/Geometry/OpticalFibre/lamp_size 1.25 cm
+/Geometry/OpticalFibre/lamp_size 0.5 cm
 /Geometry/OpticalFibre/gap_size  0.1 mm
 
 /Generator/SingleParticle/particle opticalphoton
 /Generator/SingleParticle/region LAMP               ##BODY_VOL or LAMP
-/Generator/SingleParticle/min_energy 2.455 eV        ##7.08 eV for 175 nm or 2.76 eV for 450 nm blue light
-/Generator/SingleParticle/max_energy 3.59 eV
+/Generator/SingleParticle/min_energy 2.72 eV        ##7.08 eV for 175 nm or 2.76 eV for 450 nm blue light
+/Generator/SingleParticle/max_energy 2.79 eV
 /Generator/SingleParticle/min_costheta 0
 /Generator/SingleParticle/max_costheta 0
 /Generator/SingleParticle/min_phi 0
