@@ -145,7 +145,7 @@ namespace nexus {
       h_Planck * c_light / (550. * nm),  h_Planck * c_light / (540. * nm),
       h_Planck * c_light / (530. * nm),  h_Planck * c_light / (520. * nm),
       h_Planck * c_light / (510. * nm),  h_Planck * c_light / (500. * nm),
-      h_Planck * c_light / (490. * nm),  h_Planck * c_light / (490. * nm),
+      h_Planck * c_light / (490. * nm),  h_Planck * c_light / (480. * nm),
       h_Planck * c_light / (470. * nm),  h_Planck * c_light / (460. * nm),
       h_Planck * c_light / (450. * nm),  h_Planck * c_light / (440. * nm),
       h_Planck * c_light / (430. * nm),  h_Planck * c_light / (420. * nm),
@@ -166,7 +166,7 @@ namespace nexus {
       h_Planck * c_light / (165. * nm),  h_Planck * c_light / (161. * nm),
       h_Planck * c_light / (150. * nm)};
 
-    /*G4double EFFICIENCY[entries] =
+    G4double EFFICIENCY[entries] =
       { 0.0000, 0.0001, 0.0002, 0.0004, 0.0007, 0.0014, 0.0025, 0.0040, 0.0067, 0.0103,
         0.02036148857142857,
         0.023049426020408166,
@@ -215,14 +215,14 @@ namespace nexus {
         0.2803400049844237,
         0.31889201589595373,
         0.1750, 0.1310, 0.0470,
-        0.0000};*/
+        0.0000};
 
-        G4double EFFICIENCY[entries] = {1,1,1,1,1,1,1,1,1,1,
+        /*G4double EFFICIENCY[entries] = {1,1,1,1,1,1,1,1,1,1,
                                         1,1,1,1,1,1,1,1,1,1,
                                         1,1,1,1,1,1,1,1,1,1,
                                         1,1,1,1,1,1,1,1,1,1,
                                         1,1,1,1,1,1,1,1,1,1,
-                                        1,1,1,1,1,1,1,1,1,1,1};
+                                        1,1,1,1,1,1,1,1,1,1,1};*/
 
 /* RAW EFFICIENCIES (from Hamamatsu, PMT 1666):
     { 0.0000, 0.0001, 0.0002, 0.0004, 0.0007, 0.0014, 0.0025, 0.0040, 0.0067, 0.0103,

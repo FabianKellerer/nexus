@@ -12,10 +12,10 @@
 /tracking/verbose 0
 /process/em/verbose 0
 
-/Geometry/OpticalFibre/length 500. cm
+/Geometry/OpticalFibre/length 11. cm
 /Geometry/OpticalFibre/radius 1 mm
 /Geometry/OpticalFibre/core_mat "Y11"
-/Geometry/OpticalFibre/num_fibers 1
+/Geometry/OpticalFibre/num_fibers 5
 /Geometry/OpticalFibre/fiber_dist 3 mm
 /Geometry/OpticalFibre/lamp_size 0.5 cm
 /Geometry/OpticalFibre/gap_size  0.1 mm

@@ -44,7 +44,7 @@ using namespace CLHEP;
 REGISTER_CLASS(OpticalFibre,GeometryBase)
 
 OpticalFibre::OpticalFibre():
-    GeometryBase(), radius_(1.*mm), length_(1.*cm), fiber_dist_(0.*mm), isround_(true), core_mat_("EJ280"), num_fibers_(1), lamp_size_(1.*cm),gap_(0.1*mm), cyl_vertex_gen_(0)
+    GeometryBase(), radius_(1.*mm), length_(1.*cm), fiber_dist_(0.*mm), al_(true), tefl_(true), isround_(true), core_mat_("EJ280"), num_fibers_(1), lamp_size_(1.*cm), gap_(0.1*mm), cyl_vertex_gen_(0)
     {
         msg_=new G4GenericMessenger(this,"/Geometry/OpticalFibre/","Control commands of geometry OpticalFibre");
 
@@ -65,6 +65,14 @@ OpticalFibre::OpticalFibre():
         length_cmd.SetUnitCategory("Length");
         length_cmd.SetParameterName("fiber_dist",false);
         length_cmd.SetRange("fiber_dist>0.");
+
+        G4GenericMessenger::Command& al_cmd =
+            msg_->DeclareProperty("aluminised",al_,"Are fibers aluminised or not");
+        al_cmd.SetParameterName("al_cmd",false);
+
+        G4GenericMessenger::Command& tefl_cmd =
+            msg_->DeclareProperty("teflon",tefl_,"Teflon block behind fibers yes or no");
+        tefl_cmd.SetParameterName("tefl_cmd",false);
 
         G4GenericMessenger::Command& shape_cmd =
             msg_->DeclareProperty("shape",isround_,"Shape of the fibers (round or square)");
@@ -251,12 +259,14 @@ G4Box* lab_solid = new G4Box("LAB", xlab,ylab,length_+gap_+1.*cm);
     new G4PVPlacement(G4Transform3D(sensor_rot, sensor_pos),
   		      pmt_logic_, "PMT", lab_logic, true, cntr+1, true);
 
-    // Debug volume to reflect trapped photons (Teflon)
-    G4Box* absorb_box = new G4Box("ABS",xlab/2,ylab/2,0.2*mm);
-    G4Material* tefl_mat_ = materials::PolishedAl();
-    tefl_mat_->SetMaterialPropertiesTable(opticalprops::PolishedAl());
-    G4LogicalVolume* abs_log = new G4LogicalVolume(absorb_box,tefl_mat_,"ABS");
-    //new G4PVPlacement(0,G4ThreeVector((xlab-2*radius_)/2,(ylab-2.*radius_)/2,-length_/2-0.2*mm),abs_log,abs_log->GetName(),lab_logic,true,4,true);
+    // Endcap volume to reflect trapped photons (Teflon/Aluminium/perfect absorber)
+    if (al_) {
+        G4Box* absorb_box = new G4Box("ABS",xlab/2,ylab/2,0.2*mm);
+        G4Material* tefl_mat_ = materials::PolishedAl();
+        tefl_mat_->SetMaterialPropertiesTable(opticalprops::PolishedAl());
+        G4LogicalVolume* abs_log = new G4LogicalVolume(absorb_box,tefl_mat_,"ABS");
+        new G4PVPlacement(0,G4ThreeVector((xlab-2*radius_)/2,(ylab-2.*radius_)/2,-length_/2-0.2*mm),abs_log,abs_log->GetName(),lab_logic,true,4,true);
+    }
     // Reflective surface
     //G4MaterialPropertiesTable* refl_surf = new G4MaterialPropertiesTable();
     //G4double energy2[]       = {0.2 * eV, 3.5 * eV, 3.6 * eV, 11.5 * eV};
@@ -266,6 +276,11 @@ G4Box* lab_solid = new G4Box("LAB", xlab,ylab,length_+gap_+1.*cm);
     //new G4OpticalSurface("Refl_optSurf", unified, ground, dielectric_dielectric);
     //refl_opsurf->SetMaterialPropertiesTable(refl_surf);
     //new G4LogicalSkinSurface(name + "_optSurf", abs_log, refl_opsurf);
+
+    //Teflon block behind fibers
+    //if (tefl_) {
+
+    //}
 
 }
 

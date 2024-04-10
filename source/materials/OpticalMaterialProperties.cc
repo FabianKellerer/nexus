@@ -1819,7 +1819,7 @@ namespace opticalprops {
       optPhotMaxE_
     };
 
-    //float minAbsLength = 1.3 * mm; //0.395 * mm;                //PLACEHOLDER! NOT GIVEN
+    //float minAbsLength = 0.395 * mm;                //PLACEHOLDER! NOT GIVEN
 
     std::vector<float> BCF92_absorption {
       -0.0001, -0.0043,                   //485, 480, 475
