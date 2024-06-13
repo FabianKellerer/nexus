@@ -27,7 +27,8 @@
 /process/optical/processActivation Cerenkov false
 
 # GENERATOR
-/Generator/Kr83mGenerator/region ACTIVE
+/Generator/Kr83mGenerator/region AD_HOC
+/Geometry/NextNew/specific_vertex 0. 0. 300. mm
 
 # PERSISTENCY
 /nexus/persistency/output_file Kr83_full_nexus_ACTIVE_7bar.sim
