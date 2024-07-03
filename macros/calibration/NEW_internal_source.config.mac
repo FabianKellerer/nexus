@@ -28,8 +28,8 @@
 #/Geometry/NextNew/lead_castle false
 
 # Action 
-#/Actions/DefaultEventAction/min_energy 1.4 MeV
-#/Actions/DefaultEventAction/max_energy 1.8 MeV
+/Actions/DefaultEventAction/min_energy 1.4 MeV
+/Actions/DefaultEventAction/max_energy 1.8 MeV
 
 ## For visualization
 /Geometry/NextNew/shielding_vis false
@@ -45,13 +45,13 @@
 /Geometry/PmtR11410/visibility false
 
 # Generator
-#/Generator/IonGenerator/atomic_number 81
-#/Generator/IonGenerator/mass_number 208
+/Generator/IonGenerator/atomic_number 81
+/Generator/IonGenerator/mass_number 208
 ## ANODE/AXIAL/UPPER
-#/Generator/IonGenerator/region INTERNAL_PORT_UPPER
+/Generator/IonGenerator/region INTERNAL_PORT_UPPER
 
-/Generator/Kr83mGenerator/region  AD_HOC
-/Geometry/NextNew/specific_vertex  0. 0. 300. mm
+#/Generator/Kr83mGenerator/region  AD_HOC
+#/Geometry/NextNew/specific_vertex  0. 0. 300. mm
 
 # Physics
 /PhysicsList/Nexus/clustering          false
