@@ -30,7 +30,7 @@ namespace nexus
         //generate vertex
         G4ThreeVector GenerateVertex(const G4String& region) const;
         void Construct();
-        bool issquare(G4int n);
+        bool issquare(G4int n) const;
         G4ThreeVector ComputeFiberPositions();
 
         private:

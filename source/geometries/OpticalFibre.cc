@@ -44,7 +44,7 @@ using namespace CLHEP;
 REGISTER_CLASS(OpticalFibre,GeometryBase)
 
 OpticalFibre::OpticalFibre():
-    GeometryBase(), radius_(1.*mm), length_(1.*cm), fiber_dist_(0.*mm), al_(true), tefl_(true), isround_(true), core_mat_("EJ280"), num_fibers_(1), lamp_size_(1.*cm), gap_(0.1*mm), cyl_vertex_gen_(0)
+    GeometryBase(), radius_(1.*mm), length_(1.*cm), fiber_dist_(0.*mm), al_(false), tefl_(false), isround_(true), core_mat_("EJ280"), num_fibers_(1), lamp_size_(1.*cm), gap_(0.1*mm), cyl_vertex_gen_(0)
     {
         msg_=new G4GenericMessenger(this,"/Geometry/OpticalFibre/","Control commands of geometry OpticalFibre");
 
@@ -194,7 +194,8 @@ G4Box* lab_solid = new G4Box("LAB", xlab,ylab,length_+gap_+1.*cm);
     else {
         //place fibers in a line
         for(G4int i=0; i<num_fibers_; i++){
-            G4ThreeVector position = G4ThreeVector((xlab-2*radius_)/2,(int(num_fibers_)-1)*(2*radius_+fiber_dist_)-i*(2*radius_+fiber_dist_)+puffer/2,0);
+            G4ThreeVector position = G4ThreeVector((xlab-2*radius_)/2,
+                                    (ylab-2*radius_)/2+(int(num_fibers_)-1)*(fiber_dist_/2+radius_)-i*(2*radius_+fiber_dist_),0);
             new G4PVPlacement(0,position,fiber_logic,
                             fiber_logic->GetName(),lab_logic,true,cntr,true);
             cntr+=1;
@@ -262,10 +263,19 @@ G4Box* lab_solid = new G4Box("LAB", xlab,ylab,length_+gap_+1.*cm);
     // Endcap volume to reflect trapped photons (Teflon/Aluminium/perfect absorber)
     if (al_) {
         G4Box* absorb_box = new G4Box("ABS",xlab/2,ylab/2,0.2*mm);
-        G4Material* tefl_mat_ = materials::PolishedAl();
-        tefl_mat_->SetMaterialPropertiesTable(opticalprops::PolishedAl());
-        G4LogicalVolume* abs_log = new G4LogicalVolume(absorb_box,tefl_mat_,"ABS");
+        G4Material* al_mat_ = materials::PolishedAl();
+        al_mat_->SetMaterialPropertiesTable(opticalprops::PolishedAl());
+        G4LogicalVolume* abs_log = new G4LogicalVolume(absorb_box,al_mat_,"ABS");
         new G4PVPlacement(0,G4ThreeVector((xlab-2*radius_)/2,(ylab-2.*radius_)/2,-length_/2-0.2*mm),abs_log,abs_log->GetName(),lab_logic,true,4,true);
+    }
+
+    // Reflective volume behind the fibers to increase efficiency (Teflon block)
+    if(tefl_) {
+        G4Box* absorb_box = new G4Box("ABS",0.2*mm,ylab/2,lamp_size_);
+        G4Material* tefl_mat_ = materials::PVT();
+        tefl_mat_->SetMaterialPropertiesTable(opticalprops::PTFE());
+        G4LogicalVolume* abs_log = new G4LogicalVolume(absorb_box,tefl_mat_,"ABS");
+        new G4PVPlacement(0,G4ThreeVector((xlab-4*radius_)/2,(ylab-2.*radius_)/2,-5*mm),abs_log,abs_log->GetName(),lab_logic,true,4,true);
     }
     // Reflective surface
     //G4MaterialPropertiesTable* refl_surf = new G4MaterialPropertiesTable();
@@ -276,11 +286,6 @@ G4Box* lab_solid = new G4Box("LAB", xlab,ylab,length_+gap_+1.*cm);
     //new G4OpticalSurface("Refl_optSurf", unified, ground, dielectric_dielectric);
     //refl_opsurf->SetMaterialPropertiesTable(refl_surf);
     //new G4LogicalSkinSurface(name + "_optSurf", abs_log, refl_opsurf);
-
-    //Teflon block behind fibers
-    //if (tefl_) {
-
-    //}
 
 }
 
@@ -308,30 +313,32 @@ G4ThreeVector OpticalFibre::GenerateVertex(const G4String& region) const
         }
     }
     else {
-        G4double xlab = 2*radius_+1.*mm;
+        // Calculate world size
+        G4double xlab;
         G4double ylab;
-        bool k = false;
-        for (G4int i = 0; i < num_fibers_ / 2 + 2; i++) {
-            if (i * i == num_fibers_) {
-                k = true;
-            }
-        }
-        if (k) {
-            ylab = (sqrt(num_fibers_))*(2*radius_+fiber_dist_);
-        } else {
-            ylab = (num_fibers_)*(2*radius_+fiber_dist_)-fiber_dist_;
+        G4double puffer = 10*mm;
+        bool k = issquare(num_fibers_);
+        if (k && num_fibers_>1) {
+            xlab = (sqrt(num_fibers_))*(2*radius_+fiber_dist_)-fiber_dist_;
+            ylab = (sqrt(num_fibers_))*(2*radius_+fiber_dist_)-fiber_dist_;
+        } 
+        else {
+            xlab = 25.4*mm;
+            ylab = (num_fibers_)*(2*radius_+fiber_dist_)-fiber_dist_+puffer;
+            if (ylab<xlab) ylab = xlab;
         }
         //BoxPointSampler* cyl_vertex_gen_ = new BoxPointSampler(0.1*mm,ylab,
         //                                lamp_size_,0,G4ThreeVector((xlab-6*radius_)/2-0.1*mm,(ylab-radius_-1.*mm)/2,-lamp_size_/2),0);
         G4RotationMatrix *lamp_rot = new G4RotationMatrix();
         lamp_rot->rotateY(pi/2);
-        CylinderPointSampler* cyl_vertex_gen_ = new CylinderPointSampler(0.,0.1*mm,25.4/2.*mm,
-                                        0.,G4ThreeVector((xlab-6*radius_)/2-0.1*mm,(int(num_fibers_)-1)*(2*radius_+fiber_dist_)-2*(2*radius_+fiber_dist_)+5.*mm,-5.*mm),lamp_rot);
+        CylinderPointSampler* cyl_vertex_gen_ = new CylinderPointSampler(0.,0.1*mm,lamp_size_,
+                                        0.,G4ThreeVector((xlab-6*radius_)/2-0.1*mm,(ylab-2*radius_)/2,-5.*mm),lamp_rot);
         return cyl_vertex_gen_->GenerateVertex("WHOLE_VOL");
     }
 }
 
-bool OpticalFibre::issquare(G4int n) {
+bool OpticalFibre::issquare(G4int n) const {
+    if (n==1){return false;}
     for (G4int i = 0; i < n / 2 + 2; i++) {
         if (i * i == n) {
       return true;

@@ -2303,21 +2303,78 @@ namespace opticalprops {
     mpt->AddProperty("RINDEX", ri_energy, rIndex);
 
     // ABSORPTION LENGTH
+    /*std::vector<G4double> abs_energy = {optPhotMinE_,
+      h_Planck * c_light / (750. * nm), h_Planck * c_light / (740. * nm), h_Planck * c_light / (380. * nm), h_Planck * c_light / (370. * nm),
+      optPhotMaxE_};
+      {optPhotMinE_, 
+    h_Planck * c_light / (650.0 * nm),
+    h_Planck * c_light / (600.0 * nm),
+    h_Planck * c_light / (550.0 * nm),
+    h_Planck * c_light / (530.0 * nm),
+    h_Planck * c_light / (510.0 * nm),
+    h_Planck * c_light / (475.0 * nm),
+    h_Planck * c_light / (400.0 * nm),
+    optPhotMaxE_};*/
     std::vector<G4double> abs_energy = {
-      optPhotMinE_,                      h_Planck * c_light / (750. * nm),
-      h_Planck * c_light / (740. * nm),  h_Planck * c_light / (380. * nm),
-      h_Planck * c_light / (370. * nm),  optPhotMaxE_
+      optPhotMinE_,                      h_Planck * c_light / (750.0 * nm),
+      h_Planck * c_light / (700.0 * nm), h_Planck * c_light / (698.0 * nm),
+      h_Planck * c_light / (696.0 * nm), h_Planck * c_light / (693.0 * nm),
+      h_Planck * c_light / (688.0 * nm), h_Planck * c_light / (681.0 * nm),
+      h_Planck * c_light / (672.0 * nm), h_Planck * c_light / (665.0 * nm),
+      h_Planck * c_light / (658.0 * nm), h_Planck * c_light / (652.0 * nm),
+      h_Planck * c_light / (646.0 * nm), h_Planck * c_light / (640.0 * nm),
+      h_Planck * c_light / (634.0 * nm), h_Planck * c_light / (626.0 * nm),
+      h_Planck * c_light / (618.0 * nm), h_Planck * c_light / (614.0 * nm),
+      h_Planck * c_light / (612.0 * nm), h_Planck * c_light / (611.0 * nm),
+      h_Planck * c_light / (610.0 * nm), h_Planck * c_light / (607.0 * nm),
+      h_Planck * c_light / (605.0 * nm), h_Planck * c_light / (604.0 * nm),
+      h_Planck * c_light / (602.0 * nm), h_Planck * c_light / (600.0 * nm),
+      h_Planck * c_light / (595.0 * nm), h_Planck * c_light / (589.0 * nm),
+      h_Planck * c_light / (577.0 * nm), h_Planck * c_light / (565.0 * nm),
+      h_Planck * c_light / (553.0 * nm), h_Planck * c_light / (542.0 * nm),
+      h_Planck * c_light / (535.0 * nm), h_Planck * c_light / (531.0 * nm),
+      h_Planck * c_light / (524.0 * nm), h_Planck * c_light / (517.0 * nm),
+      h_Planck * c_light / (511.0 * nm), h_Planck * c_light / (508.0 * nm),
+      h_Planck * c_light / (503.0 * nm), h_Planck * c_light / (502.0 * nm),
+      h_Planck * c_light / (501.0 * nm), h_Planck * c_light / (370.0 * nm), 
+      h_Planck * c_light / (360.0 * nm), optPhotMaxE_
     };
+    G4double Fact=3;
+    /*std::vector<G4double> absLength = {noAbsLength_,
+      noAbsLength_, 3.5 * m, 3.5 * m, noAbsLength_,
+      noAbsLength_};
+      {noAbsLength_, noAbsLength_,
+    20. * m, 20. * m, 0.7 * m, 10. * cm, 1. * cm, noAbsLength_, noAbsLength_};*/
     std::vector<G4double> absLength = {
-      noAbsLength_,  noAbsLength_,
-      3.5 * m,       3.5 * m,
-      noAbsLength_,  noAbsLength_
+      noAbsLength_, noAbsLength_,
+      1.9 * m*Fact,      2.3 * m*Fact,       // 700, 698 nm
+      2.7 * m*Fact,      3.4 * m*Fact,       // 696, 693 nm
+      4.5 * m*Fact,      6.1 * m*Fact,       // 688, 681 nm
+      7.3 * m*Fact,      7.0 * m*Fact,       // 672, 665 nm
+      6.6 * m*Fact,      5.0 * m*Fact,       // 658, 652 nm
+      4.3 * m*Fact,      4.9 * m*Fact,       // 646, 640 nm
+      5.9 * m*Fact,      6.8 * m*Fact,       // 634, 626 nm
+      6.3 * m*Fact,      4.5 * m*Fact,       // 618, 614 nm
+      3.5 * m*Fact,      2.8 * m*Fact,       // 612, 611 nm
+      2.3 * m*Fact,      2.0 * m*Fact,       // 610, 607 nm
+      2.1 * m*Fact,      2.4 * m*Fact,       // 605, 604 nm
+      2.8 * m*Fact,      3.4 * m*Fact,       // 602, 600 nm
+      4.7 * m*Fact,      5.7 * m*Fact,       // 595, 589 nm
+      5.8 * m*Fact,      4.8 * m*Fact,       // 577, 565 nm
+      4.6 * m*Fact,      4.0 * m*Fact,       // 553, 542 nm
+      3.3 * m*Fact,      2.7 * m*Fact,       // 535, 531 nm
+      2.8 * m*Fact,      2.5 * m*Fact,       // 524, 517 nm
+      2.0 * m*Fact,      1.6 * m*Fact,       // 511, 508 nm
+      1.2 * m*Fact,      1.0 * m*Fact,       // 503, 502 nm
+      0.9 * m*Fact,      5. * cm*Fact,       // 501, 370 nm
+      noAbsLength_, noAbsLength_
     };
     mpt->AddProperty("ABSLENGTH", abs_energy, absLength);
 
     // WLS ABSORPTION LENGTH
     std::vector<G4double> WLS_abs_energy = {
-      optPhotMinE_,                      h_Planck * c_light / (490. * nm),
+      optPhotMinE_,h_Planck * c_light / (520. * nm),h_Planck * c_light / (510. * nm),
+      h_Planck * c_light / (500. * nm),  h_Planck * c_light / (490. * nm),
       h_Planck * c_light / (485. * nm),  h_Planck * c_light / (475. * nm),
       h_Planck * c_light / (454. * nm),  h_Planck * c_light / (443. * nm),
       h_Planck * c_light / (430. * nm),  h_Planck * c_light / (410. * nm),
@@ -2326,7 +2383,8 @@ namespace opticalprops {
       optPhotMaxE_
     };
     std::vector<G4double> WLS_absLength = {
-      noAbsLength_,  noAbsLength_,    //     , 490 nm
+      noAbsLength_,  noAbsLength_, 100.*cm,   //     , 510 nm
+      10.   * cm,    1.   * cm,       // 500 , 490 nm
       44.2  * mm,    5.39 * mm,       // 485 , 475 nm
       0.395 * mm,    0.462 * mm,      // 454 , 443 nm
       0.354 * mm,    0.571 * mm,      // 430 , 410 nm
