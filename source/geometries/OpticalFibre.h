@@ -45,6 +45,8 @@ namespace nexus
         G4int    num_fibers_; //number of fibres in the bundle
         G4double lamp_size_;  //size of photon generation region in z direction if LAMP region is chosen
         G4double gap_;        //size of gap between fiber and sensor
+        G4double rand_wls_;   //number of sigmas of the WLS uncertainty to shift the WLS abs. length by
+        G4double rand_att_;   //number of sigmas of the attenuation uncertainty to shift
 
         GenericPhotosensor*   sensor_;
         G4GenericMessenger*   msg_;

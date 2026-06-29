@@ -100,7 +100,7 @@ namespace nexus {
     G4MaterialPropertiesTable *this_fiber_optical = nullptr;
     if (fiber_type_ == "Y11") {
       this_fiber = materials::Y11();
-      this_fiber_optical = opticalprops::Y11(syst_WLSY11, syst_Y11);
+      this_fiber_optical = opticalprops::Y11(syst_WLSY11, syst_Y11, 1, 1);
     } else {
       G4Exception("[FiberEfficiency]", "Construct()",
                   FatalException, "Invalid fiber type, must be Y11 or B2");

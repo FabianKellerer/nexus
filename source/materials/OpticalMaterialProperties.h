@@ -93,13 +93,13 @@ namespace opticalprops {
 
   G4MaterialPropertiesTable* EJ286(G4double attenuation_length=1.*m);
 
-  G4MaterialPropertiesTable* BCF92(G4double minAbsLength, std::vector<G4double> DlWLS, std::vector<G4double> Dl);
+  G4MaterialPropertiesTable* BCF92(G4double minAbsLength, std::vector<G4double> DlWLS, std::vector<G4double> Dl, G4double rand_wls, G4double rand_abs);
 
   G4MaterialPropertiesTable* G2P_FB118(G4double attenuation_length);
 
   G4MaterialPropertiesTable* SCHOTT_B270();
 
-  G4MaterialPropertiesTable* Y11(std::vector<G4double> DlWLS, std::vector<G4double> Dl);
+  G4MaterialPropertiesTable* Y11(std::vector<G4double> DlWLS, std::vector<G4double> Dl, G4double rand_wls, G4double rand_abs);
 
   G4MaterialPropertiesTable* B2();
 

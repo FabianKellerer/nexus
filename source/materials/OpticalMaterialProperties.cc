@@ -1774,7 +1774,7 @@ namespace opticalprops {
 
 
   /// BCF-92 ///
-  G4MaterialPropertiesTable* BCF92(G4double minAbsLength, std::vector<G4double> DlWLS, std::vector<G4double> Dl)
+  G4MaterialPropertiesTable* BCF92(G4double minAbsLength, std::vector<G4double> DlWLS, std::vector<G4double> Dl, G4double rand_wls, G4double rand_abs)
   {
     // https://www.luxiumsolutions.com/sites/default/files/2021-11/Fiber-Product-Sheet.pdf
 
@@ -1818,15 +1818,13 @@ namespace opticalprops {
 
     std::vector<G4double> absLength_shifted;
     absLength_shifted.reserve(absLength.size());
-
-    G4double random_val_1 = G4RandGauss::shoot(0, 1); // mean = 0, stddev = 1
     
     for (size_t i = 0; i < absLength.size(); ++i) {
       if (absLength[i] == noAbsLength_) {
         absLength_shifted.push_back(noAbsLength_);
       } else {
         // Multiply absorption length by a random number of sigmas times the absolute uncertainty Dl[i]
-        absLength_shifted.push_back(absLength[i] + random_val_1 * Dl[i] * m);
+        absLength_shifted.push_back(absLength[i] + rand_abs * Dl[i] * m);
       }
     }
 
@@ -1881,14 +1879,12 @@ namespace opticalprops {
     std::vector<G4double> WLS_absLength;
     WLS_absLength.reserve(BCF92_absorption.size());
 
-    G4double random_val_2 = G4RandGauss::shoot(0, 1); // mean = 0, stddev = 1
-
     for (size_t i = 0; i < BCF92_absorption.size(); ++i) {
       if (WLS_absLength[i] == noAbsLength_) {
         WLS_absLength.push_back(noAbsLength_);
       } else {
         // Add a random number of sigmas times the absolute uncertainty DlWLS[i] to the absorption length
-        WLS_absLength.push_back(-minAbsLength / BCF92_absorption[i] + random_val_2 * DlWLS[i] * mm); // Note the negative sign to convert from absorption to length
+        WLS_absLength.push_back(-minAbsLength / BCF92_absorption[i] + rand_wls * DlWLS[i] * mm); // Note the negative sign to convert from absorption to length
       }
     }
     
@@ -2353,7 +2349,7 @@ namespace opticalprops {
 
 
   /// Y-11 ///
-  G4MaterialPropertiesTable* Y11(std::vector<G4double> DlWLS, std::vector<G4double> Dl)
+  G4MaterialPropertiesTable* Y11(std::vector<G4double> DlWLS, std::vector<G4double> Dl, G4double rand_wls, G4double rand_abs)
   {
     // http://kuraraypsf.jp/psf/index.html
     // http://kuraraypsf.jp/psf/ws.html
@@ -2413,14 +2409,12 @@ namespace opticalprops {
     std::vector<G4double> absLength_shifted;
     absLength_shifted.reserve(absLength.size());
 
-    G4double random_val_1 = G4RandGauss::shoot(0, 1);
-
     for (size_t i = 0; i < absLength.size(); ++i) {
       if (absLength[i] == noAbsLength_) {
         absLength_shifted.push_back(noAbsLength_);
       } else {
         // Add a random shift to the absorption length in terms of sigmas of the provided Dl values
-        absLength_shifted.push_back(absLength[i] + random_val_1 * Dl[i] * m);
+        absLength_shifted.push_back(absLength[i] + rand_abs * Dl[i] * m);
       }
     }
     
@@ -2483,14 +2477,12 @@ namespace opticalprops {
     std::vector<G4double> WLS_absLength_shifted;
     WLS_absLength_shifted.reserve(WLS_absLength.size());
 
-    G4double random_val_2 = G4RandGauss::shoot(0, 1);
-
     for (size_t i = 0; i < WLS_absLength.size(); ++i) {
       if (WLS_absLength[i] == noAbsLength_) {
         WLS_absLength_shifted.push_back(noAbsLength_);
       } else {
         // Add a random number of sigmas to the absorption length in terms of the provided absolute uncertainties (DlWLS values)
-        WLS_absLength_shifted.push_back(WLS_absLength[i] + random_val_2 * DlWLS[i] * mm);
+        WLS_absLength_shifted.push_back(WLS_absLength[i] + rand_wls * DlWLS[i] * mm);
       }
     }
 

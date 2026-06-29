@@ -398,7 +398,7 @@ std::vector<G4double> syst_Y11 = {
   }
   else if (fiber_mat_name_ == "Y11") {
     fiber_mat_ = materials::Y11();
-    fiber_mat_->SetMaterialPropertiesTable(opticalprops::Y11(syst_WLSY11, syst_Y11));
+    fiber_mat_->SetMaterialPropertiesTable(opticalprops::Y11(syst_WLSY11, syst_Y11, 1, 1));
   }
   else {
     G4Exception("[NextFlexFieldCage]", "DefineMaterials()", FatalException,

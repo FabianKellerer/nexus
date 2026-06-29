@@ -44,7 +44,7 @@ using namespace CLHEP;
 REGISTER_CLASS(OpticalFibre,GeometryBase)
 
 OpticalFibre::OpticalFibre():
-    GeometryBase(), radius_(1.*mm), length_(1.*cm), fiber_dist_(0.*mm), al_(false), tefl_(false), isround_(true), core_mat_("EJ280"), num_fibers_(1), lamp_size_(1.*cm), gap_(0.1*mm), cyl_vertex_gen_(0)
+    GeometryBase(), radius_(1.*mm), length_(1.*cm), fiber_dist_(0.*mm), al_(false), tefl_(false), isround_(true), core_mat_("EJ280"), num_fibers_(1), lamp_size_(1.*cm), gap_(0.1*mm), rand_wls_(1), rand_att_(1), cyl_vertex_gen_(0)
     {
         msg_=new G4GenericMessenger(this,"/Geometry/OpticalFibre/","Control commands of geometry OpticalFibre");
 
@@ -97,6 +97,14 @@ OpticalFibre::OpticalFibre():
         gap_cmd.SetUnitCategory("Length");
         gap_cmd.SetParameterName("gap_size",false);
         gap_cmd.SetRange("gap_size>0");
+
+        G4GenericMessenger::Command& wls_cmd =
+            msg_->DeclareProperty("rand_wls",rand_wls_,"Number of sigmas of the WLS uncertainty to shift the WLS abs. length by");
+        num_cmd.SetParameterName("rand_wls",false);
+
+        G4GenericMessenger::Command& att_cmd =
+            msg_->DeclareProperty("rand_att",rand_att_,"Number of sigmas of the attenuation uncertainty to shift the attenuation length by");
+        num_cmd.SetParameterName("rand_wls",false);
 
         cyl_vertex_gen_ = new CylinderPointSampler(radius_, length_, 0.,  0., G4ThreeVector(0., 0., 0.), 0);
 
@@ -194,11 +202,11 @@ G4Box* lab_solid = new G4Box("LAB", xlab,ylab,length_+gap_+1.*cm);
     }
     if (core_mat_=="Y11") {
         core_mat = materials::Y11();
-        core_mat->SetMaterialPropertiesTable(opticalprops::Y11(syst_WLSY11, syst_Y11));
+        core_mat->SetMaterialPropertiesTable(opticalprops::Y11(syst_WLSY11, syst_Y11, rand_wls_, rand_att_));
     }
     if (core_mat_=="BCF92") {
         core_mat = materials::PVT();
-        core_mat->SetMaterialPropertiesTable(opticalprops::BCF92(0.395*mm, syst_WLSBCF92, syst_BCF92));
+        core_mat->SetMaterialPropertiesTable(opticalprops::BCF92(0.395*mm, syst_WLSBCF92, syst_BCF92, rand_wls_, rand_att_));
     }
 
     G4Material* tpb = materials::TPB();
