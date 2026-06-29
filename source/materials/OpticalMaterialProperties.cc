@@ -9,6 +9,7 @@
 #include "OpticalMaterialProperties.h"
 #include "XenonProperties.h"
 #include "SellmeierEquation.h"
+#include "Randomize.hh"
 
 #include <G4MaterialPropertiesTable.hh>
 
@@ -1773,7 +1774,7 @@ namespace opticalprops {
 
 
   /// BCF-92 ///
-  G4MaterialPropertiesTable* BCF92(G4double minAbsLength)
+  G4MaterialPropertiesTable* BCF92(G4double minAbsLength, std::vector<G4double> DlWLS, std::vector<G4double> Dl)
   {
     // https://www.luxiumsolutions.com/sites/default/files/2021-11/Fiber-Product-Sheet.pdf
 
@@ -1791,21 +1792,66 @@ namespace opticalprops {
     mpt->AddProperty("RINDEX", ri_energy, rIndex);
 
     // ABSORPTION LENGTH
-    std::vector<G4double> abs_energy = {
-      optPhotMinE_, optPhotMaxE_
-    };
-    std::vector<G4double> absLength = {       //PLACEHOLDER! NOT GIVEN
-      3.*m,3.*m
-    };
-    mpt->AddProperty("ABSLENGTH", abs_energy, absLength);
+    /*std::vector<G4double> abs_energy = {optPhotMinE_,
+      h_Planck * c_light / (750. * nm), h_Planck * c_light / (740. * nm), h_Planck * c_light / (380. * nm), h_Planck * c_light / (370. * nm),
+      optPhotMaxE_};
+    std::vector<G4double> absLength = {noAbsLength_,
+      noAbsLength_, 3. * m, 3. * m, noAbsLength_,
+      noAbsLength_};*/
+
+  std::vector<G4double> abs_energy =   {optPhotMinE_};
+  for (G4double wavelength = 705.0; wavelength >= 475.0; wavelength -= 5.0) {
+    abs_energy.push_back(h_Planck * c_light / (wavelength * nm));
+  }
+  abs_energy.push_back(optPhotMaxE_);
+
+    std::vector<G4double> absLength = {noAbsLength_, noAbsLength_,
+      3.32589222 * m, 3.98041005 * m, 4.46629898 * m, 4.68952169 * m, 4.91991135 * m,
+      4.94144933 * m, 5.00265859 * m, 4.92152446 * m, 4.70074113 * m, 4.35514924 * m,
+      4.16225558 * m, 4.18083449 * m, 4.40530249 * m, 4.52255171 * m, 4.58860514 * m,
+      4.55993562 * m, 4.47841968 * m, 3.85825057 * m, 3.01127207 * m, 3.31072854 * m,
+      3.90381391 * m, 4.24211935 * m, 4.37963864 * m, 4.41194839 * m, 4.39004923 * m,
+      4.30890463 * m, 4.23778377 * m, 4.23145425 * m, 4.21492274 * m, 4.21195012 * m,
+      4.18523007 * m, 4.14190697 * m, 4.05583609 * m, 3.75658465 * m, 3.70769376 * m,
+      3.78781419 * m, 3.721861 * m, 3.52312943 * m, 3.17334203 * m, 2.62232094 * m,
+      1.86902945 * m, 1.12225755 * m, 0.58110784 * m, 0.28072451 * m, 0.13366708 * m, noAbsLength_, noAbsLength_};
+
+    std::vector<G4double> absLength_shifted;
+    absLength_shifted.reserve(absLength.size());
+
+    G4double random_val_1 = G4RandGauss::shoot(0, 1); // mean = 0, stddev = 1
+    
+    for (size_t i = 0; i < absLength.size(); ++i) {
+      if (absLength[i] == noAbsLength_) {
+        absLength_shifted.push_back(noAbsLength_);
+      } else {
+        // Multiply absorption length by a random number of sigmas times the absolute uncertainty Dl[i]
+        absLength_shifted.push_back(absLength[i] + random_val_1 * Dl[i] * m);
+      }
+    }
+
+    // Save to a file with a unique identifier
+    long unique_id = std::time(nullptr) + G4RandFlat::shootInt((long)1000000);
+    std::string filename = "absLength_BCF92_" + std::to_string(unique_id) + ".txt";
+    std::ofstream outFile(filename);
+    if (outFile.is_open()) {
+        for (const auto& val : absLength_shifted) {
+            outFile << val << "\n";
+        }
+        outFile.close();
+    } else {
+        G4cerr << "Unable to open file for writing: " << filename << G4endl;
+    }
+
+    mpt->AddProperty("ABSLENGTH", abs_energy, absLength_shifted); // Values from own measurement with 1 mm fibre
 
     // WLS ABSORPTION LENGTH
     std::vector<G4double> WLS_abs_energy = {
       optPhotMinE_,
-      h_Planck * c_light / (485. * nm),  h_Planck * c_light / (480. * nm), 
-      h_Planck * c_light / (475. * nm),  h_Planck * c_light / (470. * nm), 
-      h_Planck * c_light / (465. * nm),  h_Planck * c_light / (460. * nm),   
-      h_Planck * c_light / (455. * nm),  h_Planck * c_light / (450. * nm),                    
+      h_Planck * c_light / (485. * nm),  h_Planck * c_light / (480. * nm),
+      h_Planck * c_light / (475. * nm),  h_Planck * c_light / (470. * nm),
+      h_Planck * c_light / (465. * nm),  h_Planck * c_light / (460. * nm),  
+      h_Planck * c_light / (455. * nm),  h_Planck * c_light / (450. * nm),                   
       h_Planck * c_light / (445. * nm),  h_Planck * c_light / (440. * nm),
       h_Planck * c_light / (435. * nm),  h_Planck * c_light / (430. * nm),
       h_Planck * c_light / (425. * nm),  h_Planck * c_light / (420. * nm),
@@ -1819,7 +1865,7 @@ namespace opticalprops {
       optPhotMaxE_
     };
 
-    //float minAbsLength = 0.395 * mm;                //PLACEHOLDER! NOT GIVEN
+
 
     std::vector<float> BCF92_absorption {
       -0.0001, -0.0043,                   //485, 480, 475
@@ -1832,18 +1878,38 @@ namespace opticalprops {
       -0.2239, -0.1560                    //350
     };
 
-    std::vector<G4double> WLS_absLength {noAbsLength_};
+    std::vector<G4double> WLS_absLength;
+    WLS_absLength.reserve(BCF92_absorption.size());
 
-    for (auto &abs_value : BCF92_absorption)
-      WLS_absLength.push_back(- minAbsLength / abs_value);
+    G4double random_val_2 = G4RandGauss::shoot(0, 1); // mean = 0, stddev = 1
 
-    WLS_absLength.push_back(noAbsLength_);
+    for (size_t i = 0; i < BCF92_absorption.size(); ++i) {
+      if (WLS_absLength[i] == noAbsLength_) {
+        WLS_absLength.push_back(noAbsLength_);
+      } else {
+        // Add a random number of sigmas times the absolute uncertainty DlWLS[i] to the absorption length
+        WLS_absLength.push_back(-minAbsLength / BCF92_absorption[i] + random_val_2 * DlWLS[i] * mm); // Note the negative sign to convert from absorption to length
+      }
+    }
+    
+    // Save to a file with a unique identifier
+    long unique_id_WLS = std::time(nullptr) + G4RandFlat::shootInt((long)1000000);
+    std::string filename_WLS = "WLS_absLength_BCF92_" + std::to_string(unique_id_WLS) + ".txt";
+    std::ofstream outFile_WLS(filename_WLS);
+    if (outFile_WLS.is_open()) {
+        for (const auto& val : WLS_absLength) {
+            outFile_WLS << val << "\n";
+        }        outFile_WLS.close();
+    } else {
+        G4cerr << "Unable to open file for writing: " << filename_WLS << G4endl;
+    }
   
     mpt->AddProperty("WLSABSLENGTH", WLS_abs_energy, WLS_absLength);
 
     // WLS EMISSION SPECTRUM
     std::vector<G4double> WLS_emi_energy = {
-      optPhotMinE_,                      h_Planck * c_light / (600. * nm),
+      optPhotMinE_,
+      h_Planck * c_light / (650. * nm),  h_Planck * c_light / (600. * nm),
       h_Planck * c_light / (595. * nm),  h_Planck * c_light / (590. * nm),
       h_Planck * c_light / (585. * nm),  h_Planck * c_light / (580. * nm),
       h_Planck * c_light / (575. * nm),  h_Planck * c_light / (570. * nm),
@@ -1863,6 +1929,7 @@ namespace opticalprops {
     };
 
     std::vector<G4double> WLS_emiSpectrum = {
+      0.0000,
       0.0000, 0.0533, 0.0725, 0.0789,
       0.0853, 0.1023, 0.1215, 0.1386,
       0.1684, 0.1855, 0.2239, 0.2729,
@@ -2286,7 +2353,7 @@ namespace opticalprops {
 
 
   /// Y-11 ///
-  G4MaterialPropertiesTable* Y11()
+  G4MaterialPropertiesTable* Y11(std::vector<G4double> DlWLS, std::vector<G4double> Dl)
   {
     // http://kuraraypsf.jp/psf/index.html
     // http://kuraraypsf.jp/psf/ws.html
@@ -2306,7 +2373,11 @@ namespace opticalprops {
     /*std::vector<G4double> abs_energy = {optPhotMinE_,
       h_Planck * c_light / (750. * nm), h_Planck * c_light / (740. * nm), h_Planck * c_light / (380. * nm), h_Planck * c_light / (370. * nm),
       optPhotMaxE_};
-      {optPhotMinE_, 
+    std::vector<G4double> absLength = {noAbsLength_,
+      noAbsLength_, 3.5 * m, 3.5 * m, noAbsLength_,
+      noAbsLength_};*/
+
+    /*std::vector<G4double> abs_energy =   {optPhotMinE_, 
     h_Planck * c_light / (650.0 * nm),
     h_Planck * c_light / (600.0 * nm),
     h_Planck * c_light / (550.0 * nm),
@@ -2314,65 +2385,62 @@ namespace opticalprops {
     h_Planck * c_light / (510.0 * nm),
     h_Planck * c_light / (475.0 * nm),
     h_Planck * c_light / (400.0 * nm),
-    optPhotMaxE_};*/
-    std::vector<G4double> abs_energy = {
-      optPhotMinE_,                      h_Planck * c_light / (750.0 * nm),
-      h_Planck * c_light / (700.0 * nm), h_Planck * c_light / (698.0 * nm),
-      h_Planck * c_light / (696.0 * nm), h_Planck * c_light / (693.0 * nm),
-      h_Planck * c_light / (688.0 * nm), h_Planck * c_light / (681.0 * nm),
-      h_Planck * c_light / (672.0 * nm), h_Planck * c_light / (665.0 * nm),
-      h_Planck * c_light / (658.0 * nm), h_Planck * c_light / (652.0 * nm),
-      h_Planck * c_light / (646.0 * nm), h_Planck * c_light / (640.0 * nm),
-      h_Planck * c_light / (634.0 * nm), h_Planck * c_light / (626.0 * nm),
-      h_Planck * c_light / (618.0 * nm), h_Planck * c_light / (614.0 * nm),
-      h_Planck * c_light / (612.0 * nm), h_Planck * c_light / (611.0 * nm),
-      h_Planck * c_light / (610.0 * nm), h_Planck * c_light / (607.0 * nm),
-      h_Planck * c_light / (605.0 * nm), h_Planck * c_light / (604.0 * nm),
-      h_Planck * c_light / (602.0 * nm), h_Planck * c_light / (600.0 * nm),
-      h_Planck * c_light / (595.0 * nm), h_Planck * c_light / (589.0 * nm),
-      h_Planck * c_light / (577.0 * nm), h_Planck * c_light / (565.0 * nm),
-      h_Planck * c_light / (553.0 * nm), h_Planck * c_light / (542.0 * nm),
-      h_Planck * c_light / (535.0 * nm), h_Planck * c_light / (531.0 * nm),
-      h_Planck * c_light / (524.0 * nm), h_Planck * c_light / (517.0 * nm),
-      h_Planck * c_light / (511.0 * nm), h_Planck * c_light / (508.0 * nm),
-      h_Planck * c_light / (503.0 * nm), h_Planck * c_light / (502.0 * nm),
-      h_Planck * c_light / (501.0 * nm), h_Planck * c_light / (370.0 * nm), 
-      h_Planck * c_light / (360.0 * nm), optPhotMaxE_
-    };
-    G4double Fact=3;
-    /*std::vector<G4double> absLength = {noAbsLength_,
-      noAbsLength_, 3.5 * m, 3.5 * m, noAbsLength_,
-      noAbsLength_};
-      {noAbsLength_, noAbsLength_,
+    optPhotMaxE_};
+    std::vector<G4double> absLength = {noAbsLength_, noAbsLength_,
     20. * m, 20. * m, 0.7 * m, 10. * cm, 1. * cm, noAbsLength_, noAbsLength_};*/
+
+    std::vector<G4double> abs_energy =   {optPhotMinE_};
+    for (G4double wavelength = 705.0; wavelength >= 475.0; wavelength -= 5.0) {
+      abs_energy.push_back(h_Planck * c_light / (wavelength * nm));
+  }
+  abs_energy.push_back(optPhotMaxE_);
+
+
     std::vector<G4double> absLength = {
       noAbsLength_, noAbsLength_,
-      1.9 * m*Fact,      2.3 * m*Fact,       // 700, 698 nm
-      2.7 * m*Fact,      3.4 * m*Fact,       // 696, 693 nm
-      4.5 * m*Fact,      6.1 * m*Fact,       // 688, 681 nm
-      7.3 * m*Fact,      7.0 * m*Fact,       // 672, 665 nm
-      6.6 * m*Fact,      5.0 * m*Fact,       // 658, 652 nm
-      4.3 * m*Fact,      4.9 * m*Fact,       // 646, 640 nm
-      5.9 * m*Fact,      6.8 * m*Fact,       // 634, 626 nm
-      6.3 * m*Fact,      4.5 * m*Fact,       // 618, 614 nm
-      3.5 * m*Fact,      2.8 * m*Fact,       // 612, 611 nm
-      2.3 * m*Fact,      2.0 * m*Fact,       // 610, 607 nm
-      2.1 * m*Fact,      2.4 * m*Fact,       // 605, 604 nm
-      2.8 * m*Fact,      3.4 * m*Fact,       // 602, 600 nm
-      4.7 * m*Fact,      5.7 * m*Fact,       // 595, 589 nm
-      5.8 * m*Fact,      4.8 * m*Fact,       // 577, 565 nm
-      4.6 * m*Fact,      4.0 * m*Fact,       // 553, 542 nm
-      3.3 * m*Fact,      2.7 * m*Fact,       // 535, 531 nm
-      2.8 * m*Fact,      2.5 * m*Fact,       // 524, 517 nm
-      2.0 * m*Fact,      1.6 * m*Fact,       // 511, 508 nm
-      1.2 * m*Fact,      1.0 * m*Fact,       // 503, 502 nm
-      0.9 * m*Fact,      5. * cm*Fact,       // 501, 370 nm
+      10.38270488 * m, 15.46184818 * m, 20.59987947 * m, 25.37241997 * m, 28.65098633 * m,
+      29.47655401 * m, 29.75640608 * m, 28.37657514 * m, 24.70067598 * m, 20.39913631 * m,
+      18.3063846 * m, 18.83082292 * m, 21.61546105 * m, 24.25488255 * m, 26.00776146 * m,
+      25.87384806 * m, 23.9606071 * m, 15.71893109 * m, 8.68756632 * m, 10.98516991 * m,
+      16.38451653 * m, 20.65322301 * m, 22.23004069 * m, 22.48418517 * m, 21.65109811 * m,
+      19.97996715 * m, 18.45771364 * m, 17.45372696 * m, 16.60127065 * m, 15.46715433 * m,
+      14.22447211 * m, 12.67125963 * m, 10.88295798 * m, 8.47831818 * m, 7.39006706 * m,
+      6.66218839 * m, 5.54058247 * m, 4.03724756 * m, 2.52988313 * m, 1.35971905 * m,
+      0.67798576 * m, 0.3393122 * m, 0.17569787 * m, 0.08956223 * m, 0.04801143 * m,
       noAbsLength_, noAbsLength_
-    };
-    mpt->AddProperty("ABSLENGTH", abs_energy, absLength);
+    }; //Values from own measurement
+
+    std::vector<G4double> absLength_shifted;
+    absLength_shifted.reserve(absLength.size());
+
+    G4double random_val_1 = G4RandGauss::shoot(0, 1);
+
+    for (size_t i = 0; i < absLength.size(); ++i) {
+      if (absLength[i] == noAbsLength_) {
+        absLength_shifted.push_back(noAbsLength_);
+      } else {
+        // Add a random shift to the absorption length in terms of sigmas of the provided Dl values
+        absLength_shifted.push_back(absLength[i] + random_val_1 * Dl[i] * m);
+      }
+    }
+    
+    // Save to a file with a unique identifier
+    long unique_id = std::time(nullptr) + G4RandFlat::shootInt((long)1000000);
+    std::string filename = "absLength_Y11_" + std::to_string(unique_id) + ".txt";
+    std::ofstream outFile(filename);
+    if (outFile.is_open()) {
+        for (size_t i = 0; i < abs_energy.size(); ++i) {
+            outFile << abs_energy[i] << " " << absLength_shifted[i] << std::endl;
+        }
+        outFile.close();
+    } else {
+        G4cerr << "Unable to open file for writing: " << filename << G4endl;
+    }
+
+    mpt->AddProperty("ABSLENGTH", abs_energy, absLength_shifted);
 
     // WLS ABSORPTION LENGTH
-    std::vector<G4double> WLS_abs_energy = {
+    /*std::vector<G4double> WLS_abs_energy = {
       optPhotMinE_,h_Planck * c_light / (520. * nm),h_Planck * c_light / (510. * nm),
       h_Planck * c_light / (500. * nm),  h_Planck * c_light / (490. * nm),
       h_Planck * c_light / (485. * nm),  h_Planck * c_light / (475. * nm),
@@ -2391,8 +2459,55 @@ namespace opticalprops {
       0.612 * mm,    4.51 * mm,       // 405 , 359 nm
       4.81  * mm,    noAbsLength_,    // 350 , 345 nm
       noAbsLength_
+    };*/
+
+    // FROM MEASUREMENT
+    std::vector<G4double> WLS_abs_energy =   {optPhotMinE_};
+    for (G4double wavelength = 515.0; wavelength >= 345.0; wavelength -= 5.0) {
+      WLS_abs_energy.push_back(h_Planck * c_light / (wavelength * nm));
+  }
+  WLS_abs_energy.push_back(optPhotMaxE_);
+
+
+    std::vector<G4double> WLS_absLength = {noAbsLength_,  noAbsLength_,
+      12.16803648 * mm, 12.08206341 * mm, 11.08096616 * mm, 11.10008156 * mm, 10.29963269 * mm,
+      8.74985981  * mm,  7.00932162 * mm,  4.71785395 * mm,  2.26960512 * mm,  0.985295   * mm,
+      0.48578827  * mm,  0.34113462 * mm,  0.33220063 * mm,  0.36943058 * mm,  0.38785514 * mm,
+      0.34688261  * mm,  0.29608896 * mm,  0.30134552 * mm,  0.34505744 * mm,  0.41323347 * mm,
+      0.44798632  * mm,  0.46593717 * mm,  0.54882469 * mm,  0.69142881 * mm,  0.83520546 * mm,
+      0.94529969  * mm,  0.90631703 * mm,  1.15184712 * mm,  0.67997385 * mm,  1.06110944 * mm,
+      0.90486334  * mm,  0.65424143 * mm,  0.79471656 * mm,    noAbsLength_,
+      noAbsLength_
     };
-    mpt->AddProperty("WLSABSLENGTH", WLS_abs_energy, WLS_absLength);
+
+    std::vector<G4double> WLS_absLength_shifted;
+    WLS_absLength_shifted.reserve(WLS_absLength.size());
+
+    G4double random_val_2 = G4RandGauss::shoot(0, 1);
+
+    for (size_t i = 0; i < WLS_absLength.size(); ++i) {
+      if (WLS_absLength[i] == noAbsLength_) {
+        WLS_absLength_shifted.push_back(noAbsLength_);
+      } else {
+        // Add a random number of sigmas to the absorption length in terms of the provided absolute uncertainties (DlWLS values)
+        WLS_absLength_shifted.push_back(WLS_absLength[i] + random_val_2 * DlWLS[i] * mm);
+      }
+    }
+
+    // Save to a file with a unique identifier
+    long unique_id_WLS = std::time(nullptr) + G4RandFlat::shootInt((long)1000000);
+    std::string filename_WLS = "WLS_absLength_Y11_" + std::to_string(unique_id_WLS) + ".txt";
+    std::ofstream outFile_WLS(filename_WLS);
+    if (outFile_WLS.is_open()) {
+        for (const auto& val : WLS_absLength_shifted) {
+            outFile_WLS << val << "\n";
+        }
+        outFile_WLS.close();
+    } else {
+        G4cerr << "Unable to open file for writing: " << filename_WLS << G4endl;
+    }
+    
+    mpt->AddProperty("WLSABSLENGTH", WLS_abs_energy, WLS_absLength_shifted);
     //for (int i=0; i<WLS_abs_entries; i++)
     //  G4cout << "* Y11 WLS absLength:  " << std::setw(8) << WLS_abs_energy[i] / eV
     //         << " eV  ==  " << std::setw(8) << (h_Planck * c_light / WLS_abs_energy[i]) / nm

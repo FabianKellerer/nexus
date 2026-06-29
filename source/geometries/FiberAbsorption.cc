@@ -54,6 +54,8 @@ FiberAbsorption::~FiberAbsorption()
 
 void FiberAbsorption::Construct()
 {
+    std::vector<G4double> syst_WLSBCF92 = {};
+    std::vector<G4double> syst_BCF92 = {};
     G4Box* lab_solid = new G4Box("LAB", 46.*mm,25.4*mm,11.*cm);
 
     G4Material* air=G4NistManager::Instance()->FindOrBuildMaterial("G4_AIR");
@@ -67,7 +69,7 @@ void FiberAbsorption::Construct()
     G4String name = "FIBER_ABSORPTION";
 
     G4Material* core_mat = materials::PVT();
-    core_mat->SetMaterialPropertiesTable(opticalprops::BCF92(lambdawls_));
+    core_mat->SetMaterialPropertiesTable(opticalprops::BCF92(lambdawls_, syst_WLSBCF92, syst_BCF92));
     GenericWLSFiber* fiber =
     new GenericWLSFiber("FIBER", true, 2.*mm,
                         11.*cm, true, false, materials::TPB(),

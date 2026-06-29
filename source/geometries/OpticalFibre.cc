@@ -113,6 +113,43 @@ OpticalFibre::~OpticalFibre()
 void OpticalFibre::Construct()
 {   
 
+    // Uncertainty vectors
+    std::vector<G4double> syst_WLSY11 = {
+        0.29954168, 0.27814827, 0.24220817, 0.23282155, 0.20920007,
+        0.17464791, 0.13866487, 0.09812573, 0.05833202, 0.03885444,
+        0.0329607 , 0.03328822, 0.03278581, 0.03170133, 0.0314333 ,
+        0.03183566, 0.03327871, 0.03279741, 0.03196641, 0.03212028,
+        0.03311408, 0.03479884, 0.03856599, 0.04695476, 0.06639167,
+        0.12054313, 0.2819549 , 0.5832129 , 1.10675271, 1.08053982,
+        1.56033944, 1.89307361, 1.72522633};
+    std::vector<G4double> syst_Y11 = {
+       0.03897649, 0.05880983, 0.07513664, 0.09312284, 0.10294135,
+       0.10330598, 0.10221196, 0.09634171, 0.08374408, 0.0662849 ,
+       0.05914838, 0.06013325, 0.06854581, 0.07668044, 0.08113814,
+       0.08112786, 0.07526827, 0.04917664, 0.02943515, 0.03517056,
+       0.05099695, 0.0640956 , 0.06888065, 0.06928472, 0.06627835,
+       0.06126615, 0.056651  , 0.05352115, 0.05140073, 0.04819723,
+       0.04489344, 0.04094288, 0.03628014, 0.03055602, 0.0282274 ,
+       0.02671656, 0.0245285 , 0.02159721, 0.01852729, 0.01483524,
+       0.01117362, 0.0109576 , 0.00861888, 0.01479128, 0.06207768};
+    std::vector<G4double> syst_WLSBCF92 = {
+        0.31756971, 0.34330534, 0.49647789, 0.91688226,  1.92173165,
+        0.32017544,  0.13471447,  0.08054783,  0.05475556,  0.04266491,
+        0.03681777,  0.03377093,  0.03221736,  0.03149993,  0.0310701 ,
+        0.03106284,  0.03152224,  0.03248003,  0.03392987,  0.03603926,
+        0.0400336 ,  0.04683477,  0.06055102,  0.0867318 ,  0.15747915,
+        0.55962362,  0.53056352,  0.958891  ,  1.60406058,   1.81228,
+        2.04437714,  1.99898282,  1.7834041 };
+    std::vector<G4double> syst_BCF92 = {
+        0.07668161, 0.09358926, 0.10533346, 0.11013016, 0.11483066,
+        0.12353031, 0.11796668, 0.1168047 , 0.11342559, 0.10970878,
+        0.10140249, 0.1055834 , 0.11126771, 0.11538286, 0.11790927,
+        0.11775898, 0.11775165, 0.10193637, 0.0816313 , 0.08958056,
+        0.10466879, 0.11480426, 0.12031607, 0.12031458, 0.12058542,
+        0.11967866, 0.1176351 , 0.11796293, 0.11801438, 0.11783206,
+        0.11732908, 0.11689157, 0.11483542, 0.10616123, 0.10540304,
+        0.10780882, 0.10568602, 0.10039032, 0.09108796, 0.07671777,
+        0.05638106, 0.03654115, 0.0221245 , 0.01866518, 0.01386619};
     // LAB. This is just a volume of air surrounding the detector
     G4double xlab;
     G4double ylab;
@@ -157,11 +194,11 @@ G4Box* lab_solid = new G4Box("LAB", xlab,ylab,length_+gap_+1.*cm);
     }
     if (core_mat_=="Y11") {
         core_mat = materials::Y11();
-        core_mat->SetMaterialPropertiesTable(opticalprops::Y11());
+        core_mat->SetMaterialPropertiesTable(opticalprops::Y11(syst_WLSY11, syst_Y11));
     }
     if (core_mat_=="BCF92") {
         core_mat = materials::PVT();
-        core_mat->SetMaterialPropertiesTable(opticalprops::BCF92(1.3*mm));
+        core_mat->SetMaterialPropertiesTable(opticalprops::BCF92(0.395*mm, syst_WLSBCF92, syst_BCF92));
     }
 
     G4Material* tpb = materials::TPB();
@@ -329,11 +366,40 @@ G4ThreeVector OpticalFibre::GenerateVertex(const G4String& region) const
         }
         //BoxPointSampler* cyl_vertex_gen_ = new BoxPointSampler(0.1*mm,ylab,
         //                                lamp_size_,0,G4ThreeVector((xlab-6*radius_)/2-0.1*mm,(ylab-radius_-1.*mm)/2,-lamp_size_/2),0);
-        G4RotationMatrix *lamp_rot = new G4RotationMatrix();
-        lamp_rot->rotateY(pi/2);
-        CylinderPointSampler* cyl_vertex_gen_ = new CylinderPointSampler(0.,0.1*mm,lamp_size_,
-                                        0.,G4ThreeVector((xlab-6*radius_)/2-0.1*mm,(ylab-2*radius_)/2,-5.*mm),lamp_rot);
-        return cyl_vertex_gen_->GenerateVertex("WHOLE_VOL");
+        //G4RotationMatrix *lamp_rot = new G4RotationMatrix();
+        //lamp_rot->rotateY(pi/2);
+        //CylinderPointSampler* cyl_vertex_gen_ = new CylinderPointSampler(0.,0.1*mm,lamp_size_,
+        //                                0.,G4ThreeVector((xlab-6*radius_)/2-0.1*mm,(ylab-2*radius_)/2,-5.*mm),lamp_rot);
+        //return cyl_vertex_gen_->GenerateVertex("WHOLE_VOL");
+        // The center point of the lamp cylindrical volume
+        G4ThreeVector origin_pos((xlab-6*radius_)/2-0.1*mm, (ylab-2*radius_)/2, -5.*mm);
+        
+        G4double max_radius = lamp_size_;
+        G4double half_length = 0.1*mm; // very thin cylinder in z direction to approximate a disk-shaped lamp
+        G4ThreeVector local_pos;
+
+        // Generate points using a spherically symmetric probability distribution
+        // Rejection sampling ensures it stays within the cylindrical volume dimensions
+        while (true) {
+            // Custom spherically symmetric parameter (3D Gaussian here)
+            // Adjust 'sigma' for narrower or wider radial distributions
+            G4double sigma = (8.64*12.7/7) * mm;  // see Systematics.ipynb fit parameter, scaled to mm in small angle approx.
+            
+            G4double x = G4RandGauss::shoot(0., sigma);
+            G4double y = G4RandGauss::shoot(0., sigma);
+            G4double z = 0.05*mm;
+            
+            // Constrain to the local cylinder bounds (prior to rotation)
+            if ((x * x + y * y) <= (max_radius * max_radius) && std::abs(z) <= half_length) {
+                local_pos = G4ThreeVector(x, y, z);
+                break;
+            }
+        }
+
+        // Apply rotation (equivalent to rotating Y by pi/2)
+        local_pos.rotateY(pi / 2.0);
+
+        return origin_pos + local_pos;
     }
 }
 
