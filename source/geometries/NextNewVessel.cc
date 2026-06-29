@@ -787,12 +787,12 @@ void NextNewVessel::Construct()
 
   NextNewVessel::~NextNewVessel()
   {
-    delete body_gen_;
+  /*  delete body_gen_;
     delete flange_gen_;
     delete tracking_endcap_gen_;
     delete energy_endcap_gen_;
     delete screw_gen_lat_;
-    delete screw_gen_axial_;
+    delete screw_gen_axial_;*/
   }
 
 
