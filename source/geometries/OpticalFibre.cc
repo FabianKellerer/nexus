@@ -100,11 +100,11 @@ OpticalFibre::OpticalFibre():
 
         G4GenericMessenger::Command& wls_cmd =
             msg_->DeclareProperty("rand_wls",rand_wls_,"Number of sigmas of the WLS uncertainty to shift the WLS abs. length by");
-        num_cmd.SetParameterName("rand_wls",false);
+        wls_cmd.SetParameterName("rand_wls",false);
 
         G4GenericMessenger::Command& att_cmd =
             msg_->DeclareProperty("rand_att",rand_att_,"Number of sigmas of the attenuation uncertainty to shift the attenuation length by");
-        num_cmd.SetParameterName("rand_wls",false);
+        att_cmd.SetParameterName("rand_att",false);
 
         cyl_vertex_gen_ = new CylinderPointSampler(radius_, length_, 0.,  0., G4ThreeVector(0., 0., 0.), 0);
 

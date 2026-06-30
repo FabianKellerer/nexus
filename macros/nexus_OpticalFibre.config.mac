@@ -20,6 +20,8 @@
 /Geometry/OpticalFibre/lamp_size 1 mm
 /Geometry/OpticalFibre/gap_size  0.1 mm
 /Geometry/OpticalFibre/aluminised false
+/Geometry/OpticalFibre/rand_wls 1
+/Geometry/OpticalFibre/rand_att 1
 
 /Generator/SingleParticle/particle opticalphoton
 /Generator/SingleParticle/region LAMP               ##BODY_VOL or LAMP

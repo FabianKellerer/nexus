@@ -10,6 +10,7 @@
 #include "XenonProperties.h"
 #include "SellmeierEquation.h"
 #include "Randomize.hh"
+#include <vector>
 
 #include <G4MaterialPropertiesTable.hh>
 
@@ -1814,7 +1815,7 @@ namespace opticalprops {
       4.30890463 * m, 4.23778377 * m, 4.23145425 * m, 4.21492274 * m, 4.21195012 * m,
       4.18523007 * m, 4.14190697 * m, 4.05583609 * m, 3.75658465 * m, 3.70769376 * m,
       3.78781419 * m, 3.721861 * m, 3.52312943 * m, 3.17334203 * m, 2.62232094 * m,
-      1.86902945 * m, 1.12225755 * m, 0.58110784 * m, 0.28072451 * m, 0.13366708 * m, noAbsLength_, noAbsLength_};
+      1.86902945 * m, 1.12225755 * m, 0.58110784 * m, 0.28072451 * m, 0.13366708 * m, 0.01 * m, 0.001 * m};
 
     std::vector<G4double> absLength_shifted;
     absLength_shifted.reserve(absLength.size());
@@ -1828,18 +1829,6 @@ namespace opticalprops {
       }
     }
 
-    // Save to a file with a unique identifier
-    long unique_id = std::time(nullptr) + G4RandFlat::shootInt((long)1000000);
-    std::string filename = "absLength_BCF92_" + std::to_string(unique_id) + ".txt";
-    std::ofstream outFile(filename);
-    if (outFile.is_open()) {
-        for (const auto& val : absLength_shifted) {
-            outFile << val << "\n";
-        }
-        outFile.close();
-    } else {
-        G4cerr << "Unable to open file for writing: " << filename << G4endl;
-    }
 
     mpt->AddProperty("ABSLENGTH", abs_energy, absLength_shifted); // Values from own measurement with 1 mm fibre
 
@@ -1860,20 +1849,22 @@ namespace opticalprops {
       h_Planck * c_light / (375. * nm),  h_Planck * c_light / (370. * nm),
       h_Planck * c_light / (365. * nm),  h_Planck * c_light / (360. * nm),
       h_Planck * c_light / (355. * nm),  h_Planck * c_light / (350. * nm),
+      h_Planck * c_light / (345. * nm),  h_Planck * c_light / (340. * nm),
       optPhotMaxE_
     };
 
 
 
-    std::vector<float> BCF92_absorption {
-      -0.0001, -0.0043,                   //485, 480, 475
+    std::vector<float> BCF92_absorption { noAbsLength_, noAbsLength_,
+      -0.0001, -0.0043,                   //480, 475
       -0.0128, -0.0256, -0.0533, -0.0981, //470, 465, 460, 455
       -0.2047, -0.3262, -0.4691, -0.6205, //450, 445, 440, 435
       -0.7100, -0.7761, -0.8486, -0.9296, //430, 425, 420, 415
       -0.9765, -1.0000, -0.9552, -0.9062, //410, 405, 400, 395
       -0.8486, -0.7783, -0.6844, -0.5928, //390, 385, 380, 375
       -0.5117, -0.4371, -0.3561, -0.2921, //370, 365, 360, 355
-      -0.2239, -0.1560                    //350
+      -0.2239, -0.1560,                    //350, 345
+      noAbsLength_, noAbsLength_
     };
 
     std::vector<G4double> WLS_absLength;
@@ -1888,17 +1879,6 @@ namespace opticalprops {
       }
     }
     
-    // Save to a file with a unique identifier
-    long unique_id_WLS = std::time(nullptr) + G4RandFlat::shootInt((long)1000000);
-    std::string filename_WLS = "WLS_absLength_BCF92_" + std::to_string(unique_id_WLS) + ".txt";
-    std::ofstream outFile_WLS(filename_WLS);
-    if (outFile_WLS.is_open()) {
-        for (const auto& val : WLS_absLength) {
-            outFile_WLS << val << "\n";
-        }        outFile_WLS.close();
-    } else {
-        G4cerr << "Unable to open file for writing: " << filename_WLS << G4endl;
-    }
   
     mpt->AddProperty("WLSABSLENGTH", WLS_abs_energy, WLS_absLength);
 
@@ -2417,19 +2397,7 @@ namespace opticalprops {
         absLength_shifted.push_back(absLength[i] + rand_abs * Dl[i] * m);
       }
     }
-    
-    // Save to a file with a unique identifier
-    long unique_id = std::time(nullptr) + G4RandFlat::shootInt((long)1000000);
-    std::string filename = "absLength_Y11_" + std::to_string(unique_id) + ".txt";
-    std::ofstream outFile(filename);
-    if (outFile.is_open()) {
-        for (size_t i = 0; i < abs_energy.size(); ++i) {
-            outFile << abs_energy[i] << " " << absLength_shifted[i] << std::endl;
-        }
-        outFile.close();
-    } else {
-        G4cerr << "Unable to open file for writing: " << filename << G4endl;
-    }
+  
 
     mpt->AddProperty("ABSLENGTH", abs_energy, absLength_shifted);
 
@@ -2484,19 +2452,6 @@ namespace opticalprops {
         // Add a random number of sigmas to the absorption length in terms of the provided absolute uncertainties (DlWLS values)
         WLS_absLength_shifted.push_back(WLS_absLength[i] + rand_wls * DlWLS[i] * mm);
       }
-    }
-
-    // Save to a file with a unique identifier
-    long unique_id_WLS = std::time(nullptr) + G4RandFlat::shootInt((long)1000000);
-    std::string filename_WLS = "WLS_absLength_Y11_" + std::to_string(unique_id_WLS) + ".txt";
-    std::ofstream outFile_WLS(filename_WLS);
-    if (outFile_WLS.is_open()) {
-        for (const auto& val : WLS_absLength_shifted) {
-            outFile_WLS << val << "\n";
-        }
-        outFile_WLS.close();
-    } else {
-        G4cerr << "Unable to open file for writing: " << filename_WLS << G4endl;
     }
     
     mpt->AddProperty("WLSABSLENGTH", WLS_abs_energy, WLS_absLength_shifted);
