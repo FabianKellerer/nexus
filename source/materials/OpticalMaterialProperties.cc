@@ -1825,9 +1825,13 @@ namespace opticalprops {
         absLength_shifted.push_back(noAbsLength_);
       } else {
         // Multiply absorption length by a random number of sigmas times the absolute uncertainty Dl[i]
+        if (absLength[i] + rand_abs * Dl[i] < 0) {
+          absLength_shifted.push_back(0 * m);
+        } else {
         absLength_shifted.push_back(absLength[i] + rand_abs * Dl[i] * m);
       }
     }
+  }
 
 
     mpt->AddProperty("ABSLENGTH", abs_energy, absLength_shifted); // Values from own measurement with 1 mm fibre
@@ -1871,13 +1875,17 @@ namespace opticalprops {
     WLS_absLength.reserve(BCF92_absorption.size());
 
     for (size_t i = 0; i < BCF92_absorption.size(); ++i) {
-      if (WLS_absLength[i] == noAbsLength_) {
+      if (BCF92_absorption[i] == noAbsLength_) {
         WLS_absLength.push_back(noAbsLength_);
       } else {
         // Add a random number of sigmas times the absolute uncertainty DlWLS[i] to the absorption length
+        if (-minAbsLength / BCF92_absorption[i] + rand_wls * DlWLS[i]<0) {
+          WLS_absLength.push_back(0 * m);
+        } else {
         WLS_absLength.push_back(-minAbsLength / BCF92_absorption[i] + rand_wls * DlWLS[i] * mm); // Note the negative sign to convert from absorption to length
       }
     }
+  }
     
   
     mpt->AddProperty("WLSABSLENGTH", WLS_abs_energy, WLS_absLength);
@@ -2394,9 +2402,13 @@ namespace opticalprops {
         absLength_shifted.push_back(noAbsLength_);
       } else {
         // Add a random shift to the absorption length in terms of sigmas of the provided Dl values
+        if (absLength[i] + rand_abs * Dl[i]<0) {
+          absLength_shifted.push_back(0.0 * m);
+        } else {
         absLength_shifted.push_back(absLength[i] + rand_abs * Dl[i] * m);
       }
     }
+  }
   
 
     mpt->AddProperty("ABSLENGTH", abs_energy, absLength_shifted);
@@ -2450,9 +2462,13 @@ namespace opticalprops {
         WLS_absLength_shifted.push_back(noAbsLength_);
       } else {
         // Add a random number of sigmas to the absorption length in terms of the provided absolute uncertainties (DlWLS values)
+        if (WLS_absLength[i] + rand_wls * DlWLS[i]<0) {
+          WLS_absLength_shifted.push_back(0.0 * m);
+        } else {
         WLS_absLength_shifted.push_back(WLS_absLength[i] + rand_wls * DlWLS[i] * mm);
       }
     }
+  }
     
     mpt->AddProperty("WLSABSLENGTH", WLS_abs_energy, WLS_absLength_shifted);
     //for (int i=0; i<WLS_abs_entries; i++)
