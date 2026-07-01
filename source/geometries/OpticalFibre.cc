@@ -44,7 +44,7 @@ using namespace CLHEP;
 REGISTER_CLASS(OpticalFibre,GeometryBase)
 
 OpticalFibre::OpticalFibre():
-    GeometryBase(), radius_(1.*mm), length_(1.*cm), fiber_dist_(0.*mm), al_(false), tefl_(false), isround_(true), core_mat_("EJ280"), num_fibers_(1), lamp_size_(1.*cm), gap_(0.1*mm), rand_wls_(1), rand_att_(1), cyl_vertex_gen_(0)
+    GeometryBase(), radius_(1.*mm), length_(1.*cm), fiber_dist_(0.*mm), al_(false), tefl_(false), isround_(true), core_mat_("EJ280"), sensortype_("PMT"), num_fibers_(1), lamp_size_(1.*cm), gap_(0.1*mm), rand_wls_(1), rand_att_(1), cyl_vertex_gen_(0)
     {
         msg_=new G4GenericMessenger(this,"/Geometry/OpticalFibre/","Control commands of geometry OpticalFibre");
 
@@ -77,6 +77,10 @@ OpticalFibre::OpticalFibre():
         G4GenericMessenger::Command& shape_cmd =
             msg_->DeclareProperty("shape",isround_,"Shape of the fibers (round or square)");
         shape_cmd.SetParameterName("shape_cmd",false);
+
+        G4GenericMessenger::Command& sensor_cmd =
+            msg_->DeclareProperty("sensor",sensortype_,"Photosensor type (PMT or SiPM)");
+        sensor_cmd.SetParameterName("sensor",false);
 
         G4GenericMessenger::Command& mat_cmd = 
             msg_->DeclareProperty("core_mat",core_mat_,"Core material (EJ280, EJ286 or Y11)");
@@ -250,60 +254,61 @@ G4Box* lab_solid = new G4Box("LAB", xlab,ylab,length_+gap_+1.*cm);
 
 
     //Build the sensor
-/*    sensor_  = new GenericPhotosensor("SENSOR", xlab, ylab, thickness_);
-    sensor_ -> SetVisibility(true);
+    if (sensortype_=="SiPM") {
+        sensor_  = new GenericPhotosensor("SENSOR", 0.25 * mm, 0.25 * mm, thickness_);
+        sensor_ -> SetVisibility(true);
 
-    //Set the sensor window material
-    G4Material* window_mat_ =
-      G4NistManager::Instance()->FindOrBuildMaterial("G4_SILICON_DIOXIDE");
-    window_mat_->SetMaterialPropertiesTable(opticalprops::FusedSilica());
-    G4MaterialPropertyVector* window_rindex = window_mat_->GetMaterialPropertiesTable()->GetProperty("RINDEX");
-    //G4MaterialPropertyVector* window_rindex = air->GetMaterialPropertiesTable()->GetProperty("RINDEX");
-    sensor_ -> SetWindowRefractiveIndex(window_rindex);
+        //Set the sensor window material
+        G4Material* window_mat_ =
+        G4NistManager::Instance()->FindOrBuildMaterial("G4_SILICON_DIOXIDE");
+        window_mat_->SetMaterialPropertiesTable(opticalprops::FusedSilica());
+        G4MaterialPropertyVector* window_rindex = window_mat_->GetMaterialPropertiesTable()->GetProperty("RINDEX");
+        //G4MaterialPropertyVector* window_rindex = air->GetMaterialPropertiesTable()->GetProperty("RINDEX");
+        sensor_ -> SetWindowRefractiveIndex(window_rindex);
 
-    //Set the optical properties of the sensor
-    G4MaterialPropertiesTable* photosensor_mpt = new G4MaterialPropertiesTable();
-    G4double energy[]       = {0.2 * eV, 3.5 * eV, 3.6 * eV, 11.5 * eV};
-    G4double reflectivity[] = {0.0     , 0.0     , 0.0     ,  0.0     };
-    G4double efficiency[]   = {1.0     , 1.0     , 1.0     ,  1.0     };
-    photosensor_mpt->AddProperty("REFLECTIVITY", energy, reflectivity, 4);
-    photosensor_mpt->AddProperty("EFFICIENCY",   energy, efficiency,   4);
-    sensor_->SetOpticalProperties(photosensor_mpt);
-    //sensor_->SetTimeBinning(1*us);
+        //Set the optical properties of the sensor
+        G4MaterialPropertiesTable* photosensor_mpt = new G4MaterialPropertiesTable();
+        G4double energy[]       = {0.2 * eV, 3.5 * eV, 3.6 * eV, 11.5 * eV};
+        G4double reflectivity[] = {0.0     , 0.0     , 0.0     ,  0.0     };
+        G4double efficiency[]   = {1.0     , 1.0     , 1.0     ,  1.0     };
+        photosensor_mpt->AddProperty("REFLECTIVITY", energy, reflectivity, 4);
+        photosensor_mpt->AddProperty("EFFICIENCY",   energy, efficiency,   4);
+        sensor_->SetOpticalProperties(photosensor_mpt);
+        //sensor_->SetTimeBinning(1*us);
 
-    sensor_->SetWithWLSCoating(false);
+        sensor_->SetWithWLSCoating(false);
 
-    //Set sensor depth and naming order
-    sensor_ ->SetSensorDepth(1);
-    //sensor_ ->SetMotherDepth(0);
-    //sensor_ ->SetNamingOrder(0);
+        //Set sensor depth and naming order
+        sensor_ ->SetSensorDepth(1);
+        //sensor_ ->SetMotherDepth(0);
+        //sensor_ ->SetNamingOrder(0);
 
-    sensor_ -> Construct();
+        sensor_ -> Construct();
 
-    //Placing the sensor
-    G4LogicalVolume* sensor_logic = sensor_ -> GetLogicalVolume();
-    G4RotationMatrix sensor_rot;
-    sensor_rot.rotateY(pi);
-    G4ThreeVector sensor_pos = G4ThreeVector((xlab-2*radius_)/2,
-                                (ylab-2.*radius_)/2,
-                                length_/2+thickness_/2+gap_/2);   
-    
+        //Placing the sensor
+        G4LogicalVolume* sensor_logic = sensor_ -> GetLogicalVolume();
+        G4RotationMatrix sensor_rot;
+        sensor_rot.rotateY(-pi/2);
+        G4ThreeVector sensor_pos = G4ThreeVector(-(xlab-6*radius_)/2+0.1*mm, (ylab-2*radius_)/2, -5.*mm);   
+        
 
-    new G4PVPlacement(G4Transform3D(sensor_rot, sensor_pos), sensor_logic,
-                        sensor_logic->GetName(), lab_logic, true,
-                        cntr+1, true);
-*/
+        new G4PVPlacement(G4Transform3D(sensor_rot, sensor_pos), sensor_logic,
+                            sensor_logic->GetName(), lab_logic, true,
+                            cntr+1, true);
+    }
+    else if (sensortype_=="PMT") {
 
-    G4RotationMatrix sensor_rot;
-    sensor_rot.rotateY(pi);
-    G4ThreeVector sensor_pos = G4ThreeVector((xlab-2*radius_)/2,
-                                (ylab-2.*radius_)/2,
-                                length_/2+gap_/2+21.5*mm);   
-    PmtR7378A pmt;
-    pmt.Construct();
-    pmt_logic_ = pmt.GetLogicalVolume();
-    new G4PVPlacement(G4Transform3D(sensor_rot, sensor_pos),
-  		      pmt_logic_, "PMT", lab_logic, true, cntr+1, true);
+        G4RotationMatrix sensor_rot;
+        sensor_rot.rotateY(pi);
+        G4ThreeVector sensor_pos = G4ThreeVector((xlab-2*radius_)/2,
+                                    (ylab-2.*radius_)/2,
+                                    length_/2+gap_/2+21.5*mm);   
+        PmtR7378A pmt;
+        pmt.Construct();
+        pmt_logic_ = pmt.GetLogicalVolume();
+        new G4PVPlacement(G4Transform3D(sensor_rot, sensor_pos),
+                pmt_logic_, "PMT", lab_logic, true, cntr+1, true);
+    }
 
     // Endcap volume to reflect trapped photons (Teflon/Aluminium/perfect absorber)
     if (al_) {

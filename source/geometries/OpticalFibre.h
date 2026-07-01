@@ -42,6 +42,7 @@ namespace nexus
         G4bool   isround_;    //if false: square fibers
         G4double thickness_;  //thickness of the photosensor
         G4String core_mat_;   //core material of the fibre (EJ280, EJ286 or Y11)
+        G4String sensortype_; //photosensor type (PMT at fibre end or SiPM opposite light source)
         G4int    num_fibers_; //number of fibres in the bundle
         G4double lamp_size_;  //size of photon generation region in z direction if LAMP region is chosen
         G4double gap_;        //size of gap between fiber and sensor
