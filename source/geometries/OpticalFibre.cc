@@ -289,7 +289,7 @@ G4Box* lab_solid = new G4Box("LAB", xlab,ylab,length_+gap_+1.*cm);
         G4LogicalVolume* sensor_logic = sensor_ -> GetLogicalVolume();
         G4RotationMatrix sensor_rot;
         sensor_rot.rotateY(-pi/2);
-        G4ThreeVector sensor_pos = G4ThreeVector(-(xlab-6*radius_)/2+0.1*mm, (ylab-2*radius_)/2, -5.*mm);   
+        G4ThreeVector sensor_pos = G4ThreeVector((xlab+2*radius_)/2+0.1*mm, (ylab-2*radius_)/2, -5.*mm);   
         
 
         new G4PVPlacement(G4Transform3D(sensor_rot, sensor_pos), sensor_logic,

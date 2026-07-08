@@ -2444,8 +2444,8 @@ namespace opticalprops {
 
 
     std::vector<G4double> WLS_absLength = {noAbsLength_,  noAbsLength_,
-      12.16803648 * mm, 12.08206341 * mm, 11.08096616 * mm, 11.10008156 * mm, 10.29963269 * mm,
-      8.74985981  * mm,  7.00932162 * mm,  4.71785395 * mm,  2.26960512 * mm,  0.985295   * mm,
+      noAbsLength_    , noAbsLength_    , noAbsLength_    ,291.42641824 * mm,173.45493716 * mm,
+      87.4320117  * mm, 45.17226306 * mm,  4.71785395 * mm,  2.26960512 * mm,  0.985295   * mm,
       0.48578827  * mm,  0.34113462 * mm,  0.33220063 * mm,  0.36943058 * mm,  0.38785514 * mm,
       0.34688261  * mm,  0.29608896 * mm,  0.30134552 * mm,  0.34505744 * mm,  0.41323347 * mm,
       0.44798632  * mm,  0.46593717 * mm,  0.54882469 * mm,  0.69142881 * mm,  0.83520546 * mm,
@@ -2491,7 +2491,7 @@ namespace opticalprops {
       h_Planck * c_light / (445. * nm),  optPhotMaxE_
     };
 
-    std::vector<G4double> WLS_emiSpectrum = {
+    std::vector<G4double> WLS_emiSpectrum_raw = {
       0.000,    0.000,   //     , 580 nm
       0.200,    0.300,   // 550 , 530 nm
       0.400,    0.600,   // 525 , 520 nm
@@ -2504,13 +2504,25 @@ namespace opticalprops {
       0.100,    0.050,   // 455 , 450 nm
       0.000,    0.000    // 445 ,     nm
     };
+
+    std::vector<G4double> WLS_emiSpectrum;
+    WLS_emiSpectrum.reserve(WLS_emi_energy.size());
+
+    for (size_t i = 0; i < WLS_emi_energy.size(); ++i) {
+      if (WLS_emiSpectrum_raw[i] == 0.000) {
+        WLS_emiSpectrum.push_back(0.000);
+      } else {
+        // Apply Jacobian of transformation to convert from wavelength to energy spectrum
+        WLS_emiSpectrum.push_back(WLS_emiSpectrum_raw[i]* h_Planck * c_light / (WLS_emi_energy[i] * WLS_emi_energy[i]));
+      }
+    }
     mpt->AddProperty("WLSCOMPONENT",  WLS_emi_energy, WLS_emiSpectrum);
 
     // WLS Delay
     mpt->AddConstProperty("WLSTIMECONSTANT", 8.5 * ns);
 
     // WLS Quantum Efficiency
-    mpt->AddConstProperty("WLSMEANNUMBERPHOTONS", 0.87);
+    mpt->AddConstProperty("WLSMEANNUMBERPHOTONS", 1.0);
 
     return mpt;
   }
