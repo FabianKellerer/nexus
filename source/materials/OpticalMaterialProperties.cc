@@ -1775,7 +1775,7 @@ namespace opticalprops {
 
 
   /// BCF-92 ///
-  G4MaterialPropertiesTable* BCF92(std::vector<G4double> DlWLS, std::vector<G4double> Dl, G4double rand_wls, G4double rand_abs)
+  G4MaterialPropertiesTable* BCF92(std::vector<G4double> DlWLS, std::vector<G4double> Dl, G4double rand_wls, G4double rand_abs, G4double qe)
   {
     // https://www.luxiumsolutions.com/sites/default/files/2021-11/Fiber-Product-Sheet.pdf
 
@@ -1932,7 +1932,7 @@ namespace opticalprops {
     mpt->AddConstProperty("WLSTIMECONSTANT", 2.7 * ns);
 
     // WLS Quantum Efficiency
-    mpt->AddConstProperty("WLSMEANNUMBERPHOTONS", 1.0);     // PLACEHOLDER! NOT GIVEN
+    mpt->AddConstProperty("WLSMEANNUMBERPHOTONS", qe);     // PLACEHOLDER! NOT GIVEN
 
     return mpt;
   }
@@ -1940,7 +1940,7 @@ namespace opticalprops {
 
 
   /// BCF-92 2mm ///
-  G4MaterialPropertiesTable* BCF92_2mm(std::vector<G4double> DlWLS, std::vector<G4double> Dl, G4double rand_wls, G4double rand_abs)
+  G4MaterialPropertiesTable* BCF92_2mm(std::vector<G4double> DlWLS, std::vector<G4double> Dl, G4double rand_wls, G4double rand_abs, G4double qe)
   {
     // https://www.luxiumsolutions.com/sites/default/files/2021-11/Fiber-Product-Sheet.pdf
 
@@ -2073,7 +2073,7 @@ namespace opticalprops {
     mpt->AddConstProperty("WLSTIMECONSTANT", 2.7 * ns);
 
     // WLS Quantum Efficiency
-    mpt->AddConstProperty("WLSMEANNUMBERPHOTONS", 1.0);     // PLACEHOLDER! NOT GIVEN
+    mpt->AddConstProperty("WLSMEANNUMBERPHOTONS", qe);     // PLACEHOLDER! NOT GIVEN
 
     return mpt;
   }
@@ -2480,7 +2480,7 @@ namespace opticalprops {
 
 
   /// Y-11 ///
-  G4MaterialPropertiesTable* Y11(std::vector<G4double> DlWLS, std::vector<G4double> Dl, G4double rand_wls, G4double rand_abs)
+  G4MaterialPropertiesTable* Y11(std::vector<G4double> DlWLS, std::vector<G4double> Dl, G4double rand_wls, G4double rand_abs, G4double qe)
   {
     // http://kuraraypsf.jp/psf/index.html
     // http://kuraraypsf.jp/psf/ws.html
@@ -2694,7 +2694,7 @@ namespace opticalprops {
     mpt->AddConstProperty("WLSTIMECONSTANT", 8.5 * ns);
 
     // WLS Quantum Efficiency
-    mpt->AddConstProperty("WLSMEANNUMBERPHOTONS", 1.0);
+    mpt->AddConstProperty("WLSMEANNUMBERPHOTONS", qe);
 
     return mpt;
   }
@@ -2702,7 +2702,7 @@ namespace opticalprops {
 
 
     /// BCF91 ///
-    G4MaterialPropertiesTable* BCF91(std::vector<G4double> DlWLS, std::vector<G4double> Dl, G4double rand_wls, G4double rand_abs)
+    G4MaterialPropertiesTable* BCF91(std::vector<G4double> DlWLS, std::vector<G4double> Dl, G4double rand_wls, G4double rand_abs, G4double qe)
     {
       // http://kuraraypsf.jp/psf/index.html
       // http://kuraraypsf.jp/psf/ws.html
@@ -2900,7 +2900,7 @@ namespace opticalprops {
       mpt->AddConstProperty("WLSTIMECONSTANT", 8.5 * ns);
   
       // WLS Quantum Efficiency
-      mpt->AddConstProperty("WLSMEANNUMBERPHOTONS", 1.0);
+      mpt->AddConstProperty("WLSMEANNUMBERPHOTONS", qe);
   
       return mpt;
     }

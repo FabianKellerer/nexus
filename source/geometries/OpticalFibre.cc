@@ -44,7 +44,7 @@ using namespace CLHEP;
 REGISTER_CLASS(OpticalFibre,GeometryBase)
 
 OpticalFibre::OpticalFibre():
-    GeometryBase(), radius_(1.*mm), length_(1.*cm), fiber_dist_(0.*mm), doubleclad_(true), al_(true), tefl_(false), isround_(true), core_mat_("EJ280"), sensortype_("PMT"), num_fibers_(1), lamp_size_(1.*cm), gap_(0.1*mm), rand_wls_(0), rand_att_(0), rand_sigma_(0), cyl_vertex_gen_(0)
+    GeometryBase(), radius_(1.*mm), length_(1.*cm), fiber_dist_(0.*mm), doubleclad_(true), al_(true), tefl_(false), isround_(true), core_mat_("EJ280"), sensortype_("PMT"), num_fibers_(1), lamp_size_(1.*cm), gap_(0.1*mm), rand_wls_(0), rand_att_(0), rand_sigma_(0), qe_(1), cyl_vertex_gen_(0)
     {
         msg_=new G4GenericMessenger(this,"/Geometry/OpticalFibre/","Control commands of geometry OpticalFibre");
 
@@ -113,6 +113,10 @@ OpticalFibre::OpticalFibre():
         G4GenericMessenger::Command& sigma_cmd =
             msg_->DeclareProperty("rand_sigma",rand_sigma_,"Number of sigmas of the attenuation uncertainty to shift the attenuation length by");
         att_cmd.SetParameterName("rand_sigma",false);
+
+        G4GenericMessenger::Command& qe_cmd =
+            msg_->DeclareProperty("qe",qe_,"Quantum efficiency of the WLS");
+        qe_cmd.SetParameterName("qe",false);
 
         G4GenericMessenger::Command& doubleclad_cmd =
             msg_->DeclareProperty("doubleclad",doubleclad_,"Double cladding or not");
@@ -279,19 +283,19 @@ G4Box* lab_solid = new G4Box("LAB", xlab,ylab,length_+gap_+1.*cm);
     }
     if (core_mat_=="Y11") {
         core_mat = materials::Y11();
-        core_mat->SetMaterialPropertiesTable(opticalprops::Y11(syst_WLSY11, syst_Y11, rand_wls_, rand_att_));
+        core_mat->SetMaterialPropertiesTable(opticalprops::Y11(syst_WLSY11, syst_Y11, rand_wls_, rand_att_, qe_));
     }
     if (core_mat_=="BCF92") {
         core_mat = materials::PVT();
-        core_mat->SetMaterialPropertiesTable(opticalprops::BCF92(syst_WLSBCF92, syst_BCF92, rand_wls_, rand_att_));
+        core_mat->SetMaterialPropertiesTable(opticalprops::BCF92(syst_WLSBCF92, syst_BCF92, rand_wls_, rand_att_, qe_));
     }
     if (core_mat_=="BCF92_2mm") {
         core_mat = materials::PVT();
-        core_mat->SetMaterialPropertiesTable(opticalprops::BCF92_2mm(syst_WLSBCF92_2mm, syst_BCF92_2mm, rand_wls_, rand_att_));
+        core_mat->SetMaterialPropertiesTable(opticalprops::BCF92_2mm(syst_WLSBCF92_2mm, syst_BCF92_2mm, rand_wls_, rand_att_, qe_));
     }
     if (core_mat_=="BCF91") {
         core_mat = materials::PVT();
-        core_mat->SetMaterialPropertiesTable(opticalprops::BCF91(syst_WLSBCF91, syst_BCF91, rand_wls_, rand_att_));
+        core_mat->SetMaterialPropertiesTable(opticalprops::BCF91(syst_WLSBCF91, syst_BCF91, rand_wls_, rand_att_, qe_));
     }
 
     G4Material* tpb = materials::TPB();
@@ -407,9 +411,9 @@ G4Box* lab_solid = new G4Box("LAB", xlab,ylab,length_+gap_+1.*cm);
     /*if(tefl_) {
         G4Box* tefl_box = new G4Box("TEFL",0.2*mm,ylab/2,lamp_size_);
         G4LogicalVolume* tefl_log = new G4LogicalVolume(tefl_box,teflon,"TEFL");
-        G4OpticalSurface* opsur_teflon = new G4OpticalSurface("TEFLON_OPSURF", unified, ground, dielectric_metal);
-        opsur_teflon->SetMaterialPropertiesTable(opticalprops::PTFE());
-        new G4LogicalSkinSurface("TEFLON_OPSURF", tefl_log, opsur_teflon);
+        //G4OpticalSurface* opsur_teflon = new G4OpticalSurface("TEFLON_OPSURF", unified, ground, dielectric_metal);
+        //opsur_teflon->SetMaterialPropertiesTable(opticalprops::PTFE());
+        //new G4LogicalSkinSurface("TEFLON_OPSURF", tefl_log, opsur_teflon);
         new G4PVPlacement(0,G4ThreeVector((xlab+2*radius_)/2-0.2*mm,(ylab-2.*radius_)/2,-5*mm),tefl_log,tefl_log->GetName(),lab_logic,true,cntr,true);
         cntr+=1;
     }*/

@@ -69,7 +69,7 @@ void FiberAbsorption::Construct()
     G4String name = "FIBER_ABSORPTION";
 
     G4Material* core_mat = materials::PVT();
-    core_mat->SetMaterialPropertiesTable(opticalprops::BCF92(syst_WLSBCF92, syst_BCF92, 1, 1));
+    core_mat->SetMaterialPropertiesTable(opticalprops::BCF92(syst_WLSBCF92, syst_BCF92, 1, 1, 1));
     GenericWLSFiber* fiber =
     new GenericWLSFiber("FIBER", true, 2.*mm,
                         11.*cm, true, false, materials::TPB(),

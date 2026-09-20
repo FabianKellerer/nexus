@@ -51,6 +51,7 @@ namespace nexus
         G4double rand_wls_;   //number of sigmas of the WLS uncertainty to shift the WLS abs. length by
         G4double rand_att_;   //number of sigmas of the attenuation uncertainty to shift
         G4double rand_sigma_; //number of sigmas of the radial distribution uncertainty to shift the radial distribution by
+        G4double qe_;          //quantum efficiency of the WLS
 
         GenericPhotosensor*   sensor_;
         G4GenericMessenger*   msg_;
