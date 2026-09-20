@@ -11,15 +11,15 @@
 /event/verbose 0
 /tracking/verbose 0
 /process/em/verbose 0
-
+/Geometry/OpticalFibre/teflon true
 /Geometry/OpticalFibre/length 11. cm
-/Geometry/OpticalFibre/radius 1 mm
+/Geometry/OpticalFibre/radius 0.5 mm
 /Geometry/OpticalFibre/core_mat "Y11"
 /Geometry/OpticalFibre/num_fibers 1
 /Geometry/OpticalFibre/fiber_dist 3 mm
-/Geometry/OpticalFibre/lamp_size 1 mm
+/Geometry/OpticalFibre/lamp_size 0.4 mm
 /Geometry/OpticalFibre/gap_size  0.1 mm
-/Geometry/OpticalFibre/aluminised false
+/Geometry/OpticalFibre/aluminised true
 /Geometry/OpticalFibre/rand_wls 1
 /Geometry/OpticalFibre/rand_att 1
 
