@@ -44,7 +44,7 @@ using namespace CLHEP;
 REGISTER_CLASS(OpticalFibre,GeometryBase)
 
 OpticalFibre::OpticalFibre():
-    GeometryBase(), radius_(1.*mm), length_(1.*cm), fiber_dist_(0.*mm), al_(false), tefl_(false), isround_(true), core_mat_("EJ280"), sensortype_("PMT"), num_fibers_(1), lamp_size_(1.*cm), gap_(0.1*mm), rand_wls_(1), rand_att_(1), cyl_vertex_gen_(0)
+    GeometryBase(), radius_(1.*mm), length_(1.*cm), fiber_dist_(0.*mm), doubleclad_(true), al_(true), tefl_(false), isround_(true), core_mat_("EJ280"), sensortype_("PMT"), num_fibers_(1), lamp_size_(1.*cm), gap_(0.1*mm), rand_wls_(0), rand_att_(0), rand_sigma_(0), cyl_vertex_gen_(0)
     {
         msg_=new G4GenericMessenger(this,"/Geometry/OpticalFibre/","Control commands of geometry OpticalFibre");
 
@@ -110,6 +110,14 @@ OpticalFibre::OpticalFibre():
             msg_->DeclareProperty("rand_att",rand_att_,"Number of sigmas of the attenuation uncertainty to shift the attenuation length by");
         att_cmd.SetParameterName("rand_att",false);
 
+        G4GenericMessenger::Command& sigma_cmd =
+            msg_->DeclareProperty("rand_sigma",rand_sigma_,"Number of sigmas of the attenuation uncertainty to shift the attenuation length by");
+        att_cmd.SetParameterName("rand_sigma",false);
+
+        G4GenericMessenger::Command& doubleclad_cmd =
+            msg_->DeclareProperty("doubleclad",doubleclad_,"Double cladding or not");
+        doubleclad_cmd.SetParameterName("double_clad",false);
+
         cyl_vertex_gen_ = new CylinderPointSampler(radius_, length_, 0.,  0., G4ThreeVector(0., 0., 0.), 0);
 
         // hardcoded thickness of the photosensor
@@ -125,43 +133,106 @@ OpticalFibre::~OpticalFibre()
 void OpticalFibre::Construct()
 {   
 
-    // Uncertainty vectors
+    // Uncertainty vectors - Total
     std::vector<G4double> syst_WLSY11 = {
-        0.29954168, 0.27814827, 0.24220817, 0.23282155, 0.20920007,
-        0.17464791, 0.13866487, 0.09812573, 0.05833202, 0.03885444,
-        0.0329607 , 0.03328822, 0.03278581, 0.03170133, 0.0314333 ,
-        0.03183566, 0.03327871, 0.03279741, 0.03196641, 0.03212028,
-        0.03311408, 0.03479884, 0.03856599, 0.04695476, 0.06639167,
-        0.12054313, 0.2819549 , 0.5832129 , 1.10675271, 1.08053982,
-        1.56033944, 1.89307361, 1.72522633};
+        6.2362406422759715, 
+        3.7656472465849005, 1.2245657525842657, 0.2895061832151893, 0.07549553511342544, 0.04134083577512349, 
+        0.04052498820147871, 0.04967762790433325, 0.05665552102265338, 0.0461697341512029, 0.03430947976337104, 
+        0.0356994342579809, 0.047762137802449964, 0.06826697396719783, 0.08300575569939848, 0.09115289942492175, 
+        0.12318710264843805, 0.19090202611479035, 0.27480378141651446, 0.3572911246287275, 0.44072316068381545};
     std::vector<G4double> syst_Y11 = {
-       0.03897649, 0.05880983, 0.07513664, 0.09312284, 0.10294135,
-       0.10330598, 0.10221196, 0.09634171, 0.08374408, 0.0662849 ,
-       0.05914838, 0.06013325, 0.06854581, 0.07668044, 0.08113814,
-       0.08112786, 0.07526827, 0.04917664, 0.02943515, 0.03517056,
-       0.05099695, 0.0640956 , 0.06888065, 0.06928472, 0.06627835,
-       0.06126615, 0.056651  , 0.05352115, 0.05140073, 0.04819723,
-       0.04489344, 0.04094288, 0.03628014, 0.03055602, 0.0282274 ,
-       0.02671656, 0.0245285 , 0.02159721, 0.01852729, 0.01483524,
-       0.01117362, 0.0109576 , 0.00861888, 0.01479128, 0.06207768};
-    std::vector<G4double> syst_WLSBCF92 = {
-        0.31756971, 0.34330534, 0.49647789, 0.91688226,  1.92173165,
-        0.32017544,  0.13471447,  0.08054783,  0.05475556,  0.04266491,
-        0.03681777,  0.03377093,  0.03221736,  0.03149993,  0.0310701 ,
-        0.03106284,  0.03152224,  0.03248003,  0.03392987,  0.03603926,
-        0.0400336 ,  0.04683477,  0.06055102,  0.0867318 ,  0.15747915,
-        0.55962362,  0.53056352,  0.958891  ,  1.60406058,   1.81228,
-        2.04437714,  1.99898282,  1.7834041 };
+        3.951850977559591, 
+        6.523479217306917, 10.138275603792696, 14.22228924405363, 15.152039831734859, 13.97549707972901, 
+        13.668649694642248, 12.145729413748258, 8.566377027282508, 7.623004535459913, 8.15758232548256, 
+        10.848687197244342, 13.492160121790265, 16.12292190375665, 15.640088034030192, 13.737027754220081, 
+        6.090717834964776, 2.13391696084334, 3.323121621783207, 6.948685986636572, 10.944914048829565, 
+        13.261700183578158, 13.282529017184137, 13.099687814276546, 11.524488707485332, 10.14755834699325, 
+        9.460607620097704, 9.002647971894174, 8.380006223287438, 7.52551731741322, 6.493902480995727, 
+        5.098187638250474, 3.33218377618802, 2.758404010038841, 2.498739459720643, 1.9262697340774957, 
+        1.213225591856089, 0.584665774620175, 0.18916233832095639, 0.05234985769054529, 0.022605286447232305,
+        0.007464580175701787};
+    std::vector<G4double> syst_WLSBCF92 = {1.557111137489016, 
+        1.5275946439949935, 1.5100087418647234, 1.4316654373831685, 1.275867602335821, 1.0569717481420842, 
+        0.7570795508140168, 0.4463270481650585, 0.25310730366827117, 0.13509815003416398, 0.07916098844846176, 
+        0.053521761272318905, 0.041591891206679686, 0.035153926939535715, 0.030640639205775075, 0.027430323595788345, 
+        0.024976148228522187, 0.02484833666183279, 0.025901235829404113, 0.029152950202253603, 0.03382354439989134, 
+        0.04015294719732863, 0.05553194236514641, 0.08790765810070811, 0.09365081313885587, 0.12928637486786582, 
+        0.3591056597577124};
     std::vector<G4double> syst_BCF92 = {
-        0.07668161, 0.09358926, 0.10533346, 0.11013016, 0.11483066,
-        0.12353031, 0.11796668, 0.1168047 , 0.11342559, 0.10970878,
-        0.10140249, 0.1055834 , 0.11126771, 0.11538286, 0.11790927,
-        0.11775898, 0.11775165, 0.10193637, 0.0816313 , 0.08958056,
-        0.10466879, 0.11480426, 0.12031607, 0.12031458, 0.12058542,
-        0.11967866, 0.1176351 , 0.11796293, 0.11801438, 0.11783206,
-        0.11732908, 0.11689157, 0.11483542, 0.10616123, 0.10540304,
-        0.10780882, 0.10568602, 0.10039032, 0.09108796, 0.07671777,
-        0.05638106, 0.03654115, 0.0221245 , 0.01866518, 0.01386619};
+        31.863572757063935, 
+        7.729369091977371, 1.4941940384715897, 2.1447210007699153, 5.945655571874951, 11.687694819571842, 
+        14.604070313323685, 15.879811117879047, 14.079037179604573, 11.333897360216987, 9.246267682013915, 
+        8.486454106431106, 8.201598546988535, 7.706345766410162, 7.054567474015823, 5.900852455445136, 
+        4.815131404386551, 2.921835510599543, 2.5792013659104325, 2.779389028640027, 2.517181534443222, 
+        1.820991423686093, 1.1086276547131013, 0.5512087383141567, 0.20932099498554863, 0.06274993681972137, 
+        0.015364191758086398};
+    std::vector<G4double> syst_WLSBCF92_2mm = {22.322064152807084, 
+        3.1738433982709613, 1.5151039731349998, 0.9721540251214319, 0.804155121943178, 0.7902766719458124, 
+        0.9069793935524967, 0.957337409529103, 0.838215318254885, 0.664525820046821, 0.5341424538310738, 
+        0.3657741726547332, 0.2489770741715708, 0.1755154509749875, 0.14573947822702618, 0.13538736024294376, 
+        0.15043575804164114, 0.4371360790020529, 7.466986930294742, 76.22489101435404};
+    std::vector<G4double> syst_BCF92_2mm = {
+        13.475633187827086, 3.0845067530882084, 0.6635737644568879, 0.1372851938232902, 0.02889022616609853
+    };
+    std::vector<G4double> syst_WLSBCF91 = {7.050357644823407, 
+        1.812130151245725, 0.3538245161444341, 0.0888260606526663, 0.05081490954180527, 0.05139907187645821, 
+        0.06303904749098155, 0.06972876840449413, 0.05587777461880875, 0.041830166525557294, 0.043727128764785364, 
+        0.05794326433984218, 0.08160655967067, 0.09530540022803664, 0.1045346163527397, 0.14314769488634188, 
+        0.22443791639254942, 0.33511086310066046, 0.4734467266646194, 0.6972798823798223, 1.077098208457186, 
+        1.6397448732109214 };
+    std::vector<G4double> syst_BCF91 = {22.049162978403363, 
+        16.445936458845246, 9.523807719011671, 3.3824464097002007, 2.1020408066088527, 1.9516197180490398, 
+        1.9524089559025435, 1.4018378087717605, 0.65291910017797, 0.19297860324917632, 0.03952396470633514, 
+        0.008702577117923212, 0.0029427092803867563};
+
+    //uncertainty vectors - manufacturing differences
+    std::vector<G4double> syst_BCF91_M = {7.442732374080068, 
+        6.351464822268071, 4.7686257927590505, 1.9463678847464594, 1.1321188953280765, 1.0910804600070183, 
+        1.0563017259739813, 0.744917471386619, 0.3256208103105999, 0.0903225677653937, 0.016316278197959087, 
+        0.0024978535955453864, 0.0};
+    std::vector<G4double> syst_Y11_M = {2.0202068143622927, 
+        3.7334765210753686, 5.60332730097983, 7.7185108054463365, 9.714304038318435, 9.558478519229922, 
+        9.241328798908409, 8.93229300246718, 7.421759217393541, 5.219459540145046, 4.814535727019093, 
+        5.334057455293114, 6.42019135430776, 7.721229760348157, 8.46819056326845, 8.007287613568712, 
+        6.856329618737617, 2.8903868910253045, 1.368680732878047, 2.5339104656206093, 4.826214641945471, 
+        6.892656148532167, 7.747421494067968, 7.92248184738345, 7.56446872492184, 6.709973476524898, 
+        6.058949773492239, 5.795655949719391, 5.636500122311823, 5.41207193209774, 5.034524515182438, 
+        4.355031271061526, 3.4342198984001975, 2.30093779313343, 2.064547596863941, 1.8329679247800283, 
+        1.401642959714907, 0.8502551160969012, 0.3793001366260554, 0.11337251513907083, 0.025014542108357615, 
+        0.00891885788925397};
+    std::vector<G4double> syst_WLSBCF92_M = {0.8796310230472657, 
+        0.8549825170662467, 0.861317307396165, 0.7973600808507065, 0.721071073733736, 0.6016111117224587, 
+        0.4417465717375406, 0.260656513106415, 0.14854533818087237, 0.08160087463601452, 0.0478291356335527, 
+        0.03295158306142624, 0.025496077787160232, 0.021985154357095422, 0.01942328236009304, 0.017498180643784743, 
+        0.016107746592005007, 0.016057530047128975, 0.017000427132760815, 0.01921376701638304, 0.023206200661527863, 
+        0.026308141347914267, 0.03666499402912999, 0.058140597012252444, 0.05900475227704639, 0.09434755876027955, 
+        0.22035787419162275};
+    std::vector<G4double> syst_WLSBCF92_2mm_M = {21.274600324142046, 
+        3.03611034628292, 1.4474720393363152, 0.9293613297805439, 0.7677300417497889, 0.752688148857639, 
+        0.8632207561503051, 0.9093710786847438, 0.7963782127550056, 0.6309367882840236, 0.5072220025252183, 
+        0.34719789929087314, 0.23644252782683872, 0.1663158426298309, 0.1377055227564194, 0.1275957421588165, 
+        0.13649531575213733, 0.37930955623262, 6.241878076368693, 59.04948782942525};
+    /*std::vector<G4double> syst_WLSY11_M = {
+        3.4449607689059287, 
+        2.0845485163075423, 0.6778577728811916, 0.16641590840746764, 0.043946284234532194, 0.02425885133130992, 
+        0.023941045107760347, 0.029185955333199343, 0.0334670725960524, 0.02760599627287378, 0.020463652324858122, 
+        0.02127323572925406, 0.02825587907503537, 0.040764958247356015, 0.0498174199688172, 0.054857023805037174, 
+        0.07458520996065733, 0.11488546878393072, 0.16227881297081112, 0.2064917974989712, 0.24143658768585094};*/
+    std::vector<G4double> syst_WLSY11_M = {1.10909082357, 
+        0.9568432108254918, 0.905292086467, 0.857262903408, 0.8031960026253675, 0.7273967709515743, 
+        0.6831279696779592, 0.4159287465936, 0.1500484193752647, 0.05994408820112083, 0.04574944088201120, 
+        0.034307253395308386, 0.036326958739466, 0.04988484741575766, 0.0381765349996225, 0.029310337210823195, 
+        0.03646800268972645, 0.042106151249108624, 0.06264114209806373, 0.06484520609139349, 0.07837493901099597, 
+        0.08960107935159256, 0.11124206862, 0.1544935038252093, 0.19730573059124693, 0.2121481068234, 
+        0.22353214016591683, 0.30364636840448433, 0.31579967611721066, 0.16384515974529076};
+    std::vector<G4double> syst_WLSBCF91_M = {1.1728973855741958, 
+        1.1441603263529758, 1.159702647210629, 1.0478785092548384, 0.9051250843875618, 0.9589573042642915, 
+        0.8288613242407584, 0.49106593782593944, 0.22077412246626912, 0.07986282745231416, 0.0502248005163302, 
+        0.057560833750762964, 0.06864589344015042, 0.06978657388325514, 0.058123671054423606, 0.04799687168539973, 
+        0.047690625957815924, 0.06503519881425975, 0.0740201925779011, 0.08985705348906284, 0.09295966867574001, 
+        0.1120690554472324, 0.14512307733245858, 0.19357109226981778, 0.20181796027435137, 0.2828306020976765, 
+        0.35095722625135556, 0.5120258348180301, 0.4481730570715898, 0.26022386307175654};
+
     // LAB. This is just a volume of air surrounding the detector
     G4double xlab;
     G4double ylab;
@@ -195,6 +266,8 @@ G4Box* lab_solid = new G4Box("LAB", xlab,ylab,length_+gap_+1.*cm);
     G4Material* pmma = materials::PMMA();
     pmma->SetMaterialPropertiesTable(opticalprops::PMMA());
 
+    G4Material* teflon = G4NistManager::Instance()->FindOrBuildMaterial("G4_TEFLON");
+
     G4Material* core_mat;
     if (core_mat_=="EJ280") {
         core_mat = materials::PVT();
@@ -210,7 +283,15 @@ G4Box* lab_solid = new G4Box("LAB", xlab,ylab,length_+gap_+1.*cm);
     }
     if (core_mat_=="BCF92") {
         core_mat = materials::PVT();
-        core_mat->SetMaterialPropertiesTable(opticalprops::BCF92(0.395*mm, syst_WLSBCF92, syst_BCF92, rand_wls_, rand_att_));
+        core_mat->SetMaterialPropertiesTable(opticalprops::BCF92(syst_WLSBCF92, syst_BCF92, rand_wls_, rand_att_));
+    }
+    if (core_mat_=="BCF92_2mm") {
+        core_mat = materials::PVT();
+        core_mat->SetMaterialPropertiesTable(opticalprops::BCF92_2mm(syst_WLSBCF92_2mm, syst_BCF92_2mm, rand_wls_, rand_att_));
+    }
+    if (core_mat_=="BCF91") {
+        core_mat = materials::PVT();
+        core_mat->SetMaterialPropertiesTable(opticalprops::BCF91(syst_WLSBCF91, syst_BCF91, rand_wls_, rand_att_));
     }
 
     G4Material* tpb = materials::TPB();
@@ -219,7 +300,7 @@ G4Box* lab_solid = new G4Box("LAB", xlab,ylab,length_+gap_+1.*cm);
     //define logical volume
     GenericWLSFiber* fiber =
     new GenericWLSFiber("FIBER", isround_, 2*radius_,
-                        length_, true, coating, tpb,
+                        length_, doubleclad_, coating, tpb,
                         core_mat, true);
     fiber->Construct();
     G4LogicalVolume* fiber_logic = fiber->GetLogicalVolume();
@@ -294,7 +375,8 @@ G4Box* lab_solid = new G4Box("LAB", xlab,ylab,length_+gap_+1.*cm);
 
         new G4PVPlacement(G4Transform3D(sensor_rot, sensor_pos), sensor_logic,
                             sensor_logic->GetName(), lab_logic, true,
-                            cntr+1, true);
+                            cntr, true);
+        cntr+=1;
     }
     else if (sensortype_=="PMT") {
 
@@ -307,25 +389,29 @@ G4Box* lab_solid = new G4Box("LAB", xlab,ylab,length_+gap_+1.*cm);
         pmt.Construct();
         pmt_logic_ = pmt.GetLogicalVolume();
         new G4PVPlacement(G4Transform3D(sensor_rot, sensor_pos),
-                pmt_logic_, "PMT", lab_logic, true, cntr+1, true);
+                pmt_logic_, "PMT", lab_logic, true, cntr, true);
+        cntr+=1;
     }
 
     // Endcap volume to reflect trapped photons (Teflon/Aluminium/perfect absorber)
     if (al_) {
         G4Box* absorb_box = new G4Box("ABS",xlab/2,ylab/2,0.2*mm);
         G4Material* al_mat_ = materials::PolishedAl();
-        al_mat_->SetMaterialPropertiesTable(opticalprops::PolishedAl());
+        al_mat_->SetMaterialPropertiesTable(opticalprops::PerfectAbsorber());
         G4LogicalVolume* abs_log = new G4LogicalVolume(absorb_box,al_mat_,"ABS");
-        new G4PVPlacement(0,G4ThreeVector((xlab-2*radius_)/2,(ylab-2.*radius_)/2,-length_/2-0.2*mm),abs_log,abs_log->GetName(),lab_logic,true,4,true);
+        new G4PVPlacement(0,G4ThreeVector((xlab-2*radius_)/2,(ylab-2.*radius_)/2,-length_/2-0.2*mm),abs_log,abs_log->GetName(),lab_logic,true,cntr,true);
+        cntr+=1;
     }
 
     // Reflective volume behind the fibers to increase efficiency (Teflon block)
     if(tefl_) {
-        G4Box* absorb_box = new G4Box("ABS",0.2*mm,ylab/2,lamp_size_);
-        G4Material* tefl_mat_ = materials::PVT();
-        tefl_mat_->SetMaterialPropertiesTable(opticalprops::PTFE());
-        G4LogicalVolume* abs_log = new G4LogicalVolume(absorb_box,tefl_mat_,"ABS");
-        new G4PVPlacement(0,G4ThreeVector((xlab-4*radius_)/2,(ylab-2.*radius_)/2,-5*mm),abs_log,abs_log->GetName(),lab_logic,true,4,true);
+        G4Box* tefl_box = new G4Box("TEFL",0.2*mm,ylab/2,lamp_size_);
+        G4LogicalVolume* tefl_log = new G4LogicalVolume(tefl_box,teflon,"TEFL");
+        G4OpticalSurface* opsur_teflon = new G4OpticalSurface("TEFLON_OPSURF", unified, ground, dielectric_metal);
+        opsur_teflon->SetMaterialPropertiesTable(opticalprops::PTFE());
+        new G4LogicalSkinSurface("TEFLON_OPSURF", tefl_log, opsur_teflon);
+        new G4PVPlacement(0,G4ThreeVector((xlab+2*radius_)/2-0.2*mm,(ylab-2.*radius_)/2,-5*mm),tefl_log,tefl_log->GetName(),lab_logic,true,cntr,true);
+        cntr+=1;
     }
     // Reflective surface
     //G4MaterialPropertiesTable* refl_surf = new G4MaterialPropertiesTable();
@@ -396,7 +482,7 @@ G4ThreeVector OpticalFibre::GenerateVertex(const G4String& region) const
         while (true) {
             // Custom spherically symmetric parameter (3D Gaussian here)
             // Adjust 'sigma' for narrower or wider radial distributions
-            G4double sigma = (8.64*12.7/7) * mm;  // see Systematics.ipynb fit parameter, scaled to mm in small angle approx.
+            G4double sigma = (1+rand_sigma_)*(8.47*12.7/7) * mm;  // see Systematics.ipynb fit parameter, scaled to mm in small angle approx.
             
             G4double x = G4RandGauss::shoot(0., sigma);
             G4double y = G4RandGauss::shoot(0., sigma);

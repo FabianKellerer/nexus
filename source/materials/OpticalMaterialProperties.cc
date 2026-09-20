@@ -1775,7 +1775,7 @@ namespace opticalprops {
 
 
   /// BCF-92 ///
-  G4MaterialPropertiesTable* BCF92(G4double minAbsLength, std::vector<G4double> DlWLS, std::vector<G4double> Dl, G4double rand_wls, G4double rand_abs)
+  G4MaterialPropertiesTable* BCF92(std::vector<G4double> DlWLS, std::vector<G4double> Dl, G4double rand_wls, G4double rand_abs)
   {
     // https://www.luxiumsolutions.com/sites/default/files/2021-11/Fiber-Product-Sheet.pdf
 
@@ -1801,21 +1801,19 @@ namespace opticalprops {
       noAbsLength_};*/
 
   std::vector<G4double> abs_energy =   {optPhotMinE_};
-  for (G4double wavelength = 705.0; wavelength >= 475.0; wavelength -= 5.0) {
+  for (G4double wavelength = 625.0; wavelength >= 485.0; wavelength -= 5.0) {
     abs_energy.push_back(h_Planck * c_light / (wavelength * nm));
   }
   abs_energy.push_back(optPhotMaxE_);
 
     std::vector<G4double> absLength = {noAbsLength_, noAbsLength_,
-      3.32589222 * m, 3.98041005 * m, 4.46629898 * m, 4.68952169 * m, 4.91991135 * m,
-      4.94144933 * m, 5.00265859 * m, 4.92152446 * m, 4.70074113 * m, 4.35514924 * m,
-      4.16225558 * m, 4.18083449 * m, 4.40530249 * m, 4.52255171 * m, 4.58860514 * m,
-      4.55993562 * m, 4.47841968 * m, 3.85825057 * m, 3.01127207 * m, 3.31072854 * m,
-      3.90381391 * m, 4.24211935 * m, 4.37963864 * m, 4.41194839 * m, 4.39004923 * m,
-      4.30890463 * m, 4.23778377 * m, 4.23145425 * m, 4.21492274 * m, 4.21195012 * m,
-      4.18523007 * m, 4.14190697 * m, 4.05583609 * m, 3.75658465 * m, 3.70769376 * m,
-      3.78781419 * m, 3.721861 * m, 3.52312943 * m, 3.17334203 * m, 2.62232094 * m,
-      1.86902945 * m, 1.12225755 * m, 0.58110784 * m, 0.28072451 * m, 0.13366708 * m, 0.01 * m, 0.001 * m};
+      52.32233345913064 * m, 
+      23.63540339152609 * m, 9.616513362420719 * m, 11.897886233412608 * m, 21.020677408584643 * m, 31.037556097005602 * m, 
+      35.94284187665091 * m, 37.79925709290958 * m, 35.76010234401748 * m, 31.42089051660111 * m, 28.197165789081257 * m, 
+      26.976747176446622 * m, 26.532098648785546 * m, 25.581778313422685 * m, 24.272109393559116 * m, 22.70507470280138 * m, 
+      20.090120485768217 * m, 15.250645758735986 * m, 14.261820685097293 * m, 14.746002344116219 * m, 13.998950832941288 * m, 
+      11.748016463405332 * m, 8.848943758172373 * m, 5.8742111855031105 * m, 3.311127838121963 * m, 1.6316295123168663 * m, 
+      0.7390228818740966 * m, noAbsLength_, noAbsLength_};
 
     std::vector<G4double> absLength_shifted;
     absLength_shifted.reserve(absLength.size());
@@ -1825,7 +1823,7 @@ namespace opticalprops {
         absLength_shifted.push_back(noAbsLength_);
       } else {
         // Multiply absorption length by a random number of sigmas times the absolute uncertainty Dl[i]
-        if (absLength[i] + rand_abs * Dl[i] < 0) {
+        if (absLength[i] + rand_abs * Dl[i] * m<0.0 * m) {
           absLength_shifted.push_back(0 * m);
         } else {
         absLength_shifted.push_back(absLength[i] + rand_abs * Dl[i] * m);
@@ -1851,15 +1849,13 @@ namespace opticalprops {
       h_Planck * c_light / (395. * nm),  h_Planck * c_light / (390. * nm),
       h_Planck * c_light / (385. * nm),  h_Planck * c_light / (380. * nm),
       h_Planck * c_light / (375. * nm),  h_Planck * c_light / (370. * nm),
-      h_Planck * c_light / (365. * nm),  h_Planck * c_light / (360. * nm),
-      h_Planck * c_light / (355. * nm),  h_Planck * c_light / (350. * nm),
-      h_Planck * c_light / (345. * nm),  h_Planck * c_light / (340. * nm),
+      h_Planck * c_light / (365. * nm),  
       optPhotMaxE_
     };
 
 
 
-    std::vector<float> BCF92_absorption { noAbsLength_, noAbsLength_,
+    /*std::vector<float> BCF92_absorption { noAbsLength_, noAbsLength_,
       -0.0001, -0.0043,                   //480, 475
       -0.0128, -0.0256, -0.0533, -0.0981, //470, 465, 460, 455
       -0.2047, -0.3262, -0.4691, -0.6205, //450, 445, 440, 435
@@ -1869,26 +1865,32 @@ namespace opticalprops {
       -0.5117, -0.4371, -0.3561, -0.2921, //370, 365, 360, 355
       -0.2239, -0.1560,                    //350, 345
       noAbsLength_, noAbsLength_
-    };
+    };*/
 
-    std::vector<G4double> WLS_absLength;
-    WLS_absLength.reserve(BCF92_absorption.size());
+    std::vector<float> WLS_absLength {noAbsLength_, noAbsLength_, 3.0813815931968858 * mm, 2.9803978298943776 * mm, 2.820241235577829 * mm, 2.548255726486477 * mm, 
+      2.1247175603489703 * mm, 1.6239297336152254 * mm, 1.1981915766587616 * mm, 0.8707851464913191 * mm, 0.6537505351268396 * mm, 
+      0.5283642611508775 * mm, 0.4583750540471322 * mm, 0.4178514806989596 * mm, 0.38733402359308483 * mm, 0.3594847255683742 * mm, 
+      0.3374349501370552 * mm, 0.3299785371076296 * mm, 0.33726043075805084 * mm, 0.35239698190727736 * mm, 0.3691352450540478 * mm, 
+      0.3900799865764449 * mm, 0.4105683857264851 * mm, 0.45420225492709904 * mm, 0.44431836003547587 * mm, noAbsLength_, noAbsLength_};
 
-    for (size_t i = 0; i < BCF92_absorption.size(); ++i) {
-      if (BCF92_absorption[i] == noAbsLength_) {
-        WLS_absLength.push_back(noAbsLength_);
+    std::vector<G4double> WLS_absLength_shifted;
+    WLS_absLength_shifted.reserve(WLS_absLength.size());
+
+    for (size_t i = 0; i < WLS_absLength.size(); ++i) {
+      if (WLS_absLength[i] == noAbsLength_) {
+        WLS_absLength_shifted.push_back(noAbsLength_);
       } else {
-        // Add a random number of sigmas times the absolute uncertainty DlWLS[i] to the absorption length
-        if (-minAbsLength / BCF92_absorption[i] + rand_wls * DlWLS[i]<0) {
-          WLS_absLength.push_back(0 * m);
+        // Add a random number of sigmas to the absorption length in terms of the provided absolute uncertainties (DlWLS values)
+        if (WLS_absLength[i] + rand_wls * DlWLS[i] * mm<0.0 * mm) {
+          WLS_absLength_shifted.push_back(0.0 * m);
         } else {
-        WLS_absLength.push_back(-minAbsLength / BCF92_absorption[i] + rand_wls * DlWLS[i] * mm); // Note the negative sign to convert from absorption to length
+        WLS_absLength_shifted.push_back(WLS_absLength[i] + rand_wls * DlWLS[i] * mm);
       }
     }
   }
     
   
-    mpt->AddProperty("WLSABSLENGTH", WLS_abs_energy, WLS_absLength);
+    mpt->AddProperty("WLSABSLENGTH", WLS_abs_energy, WLS_absLength_shifted);
 
     // WLS EMISSION SPECTRUM
     std::vector<G4double> WLS_emi_energy = {
@@ -1930,7 +1932,148 @@ namespace opticalprops {
     mpt->AddConstProperty("WLSTIMECONSTANT", 2.7 * ns);
 
     // WLS Quantum Efficiency
-    mpt->AddConstProperty("WLSMEANNUMBERPHOTONS", 0.9);     // PLACEHOLDER! NOT GIVEN
+    mpt->AddConstProperty("WLSMEANNUMBERPHOTONS", 1.0);     // PLACEHOLDER! NOT GIVEN
+
+    return mpt;
+  }
+
+
+
+  /// BCF-92 2mm ///
+  G4MaterialPropertiesTable* BCF92_2mm(std::vector<G4double> DlWLS, std::vector<G4double> Dl, G4double rand_wls, G4double rand_abs)
+  {
+    // https://www.luxiumsolutions.com/sites/default/files/2021-11/Fiber-Product-Sheet.pdf
+
+    G4MaterialPropertiesTable* mpt = new G4MaterialPropertiesTable();
+
+    // REFRACTIVE INDEX
+    std::vector<G4double> ri_energy = {
+      optPhotMinE_,
+      optPhotMaxE_
+    };
+
+    std::vector<G4double> rIndex = {
+      1.6,1.6
+    };
+    mpt->AddProperty("RINDEX", ri_energy, rIndex);
+
+    // ABSORPTION LENGTH
+    /*std::vector<G4double> abs_energy = {optPhotMinE_,
+      h_Planck * c_light / (750. * nm), h_Planck * c_light / (740. * nm), h_Planck * c_light / (380. * nm), h_Planck * c_light / (370. * nm),
+      optPhotMaxE_};
+    std::vector<G4double> absLength = {noAbsLength_,
+      noAbsLength_, 3. * m, 3. * m, noAbsLength_,
+      noAbsLength_};*/
+
+  std::vector<G4double> abs_energy =   {optPhotMinE_};
+  for (G4double wavelength = 515.0; wavelength >= 485.0; wavelength -= 5.0) {
+    abs_energy.push_back(h_Planck * c_light / (wavelength * nm));
+  }
+  abs_energy.push_back(optPhotMaxE_);
+
+    std::vector<G4double> absLength = {noAbsLength_, noAbsLength_,
+      21.15719089028033 * m, 9.936002515627452 * m, 4.4601947311817565 * m, 1.914168185115402 * m, 0.7993462479055786 * m, noAbsLength_, noAbsLength_};
+
+    std::vector<G4double> absLength_shifted;
+    absLength_shifted.reserve(absLength.size());
+    
+    for (size_t i = 0; i < absLength.size(); ++i) {
+      if (absLength[i] == noAbsLength_) {
+        absLength_shifted.push_back(noAbsLength_);
+      } else {
+        // Multiply absorption length by a random number of sigmas times the absolute uncertainty Dl[i]
+        if (absLength[i] + rand_abs * Dl[i] * m<0.0 * m) {
+          absLength_shifted.push_back(0 * m);
+        } else {
+        absLength_shifted.push_back(absLength[i] + rand_abs * Dl[i] * m);
+      }
+    }
+  }
+
+
+    mpt->AddProperty("ABSLENGTH", abs_energy, absLength_shifted); // Values from own measurement with 1 mm fibre
+
+    // WLS ABSORPTION LENGTH
+    std::vector<G4double> WLS_abs_energy = {
+      optPhotMinE_,
+      h_Planck * c_light / (460. * nm),  
+      h_Planck * c_light / (455. * nm),  h_Planck * c_light / (450. * nm),                   
+      h_Planck * c_light / (445. * nm),  h_Planck * c_light / (440. * nm),
+      h_Planck * c_light / (435. * nm),  h_Planck * c_light / (430. * nm),
+      h_Planck * c_light / (425. * nm),  h_Planck * c_light / (420. * nm),
+      h_Planck * c_light / (415. * nm),  h_Planck * c_light / (410. * nm),
+      h_Planck * c_light / (405. * nm),  h_Planck * c_light / (400. * nm),
+      h_Planck * c_light / (395. * nm),  h_Planck * c_light / (390. * nm),
+      h_Planck * c_light / (385. * nm),  h_Planck * c_light / (380. * nm),
+      h_Planck * c_light / (375. * nm),
+      optPhotMaxE_
+    };
+
+    std::vector<float> WLS_absLength {noAbsLength_, noAbsLength_, 2.713467389472847 * mm, 1.5092353056925105 * mm, 0.9400702665278959 * mm, 0.6662336271107725 * mm, 
+      0.49808633095559945 * mm, 0.415876080902462 * mm, 0.3677420722770188 * mm, 0.33982621929377355 * mm, 0.3122826142322721 * mm, 
+      0.3017491282122938 * mm, 0.2986411170826551 * mm, 0.2997967969613399 * mm, 0.310005192997796 * mm, 0.32183620023460213 * mm, 
+      0.3338029846993036 * mm, 0.33453570285312406 * mm, noAbsLength_, noAbsLength_};
+    
+    std::vector<G4double> WLS_absLength_shifted;
+    WLS_absLength_shifted.reserve(WLS_absLength.size());
+
+    for (size_t i = 0; i < WLS_absLength.size(); ++i) {
+      if (WLS_absLength[i] == noAbsLength_) {
+        WLS_absLength_shifted.push_back(noAbsLength_);
+      } else {
+        // Add a random number of sigmas to the absorption length in terms of the provided absolute uncertainties (DlWLS values)
+        if (WLS_absLength[i] + rand_wls * DlWLS[i] * mm<0.0 * mm) {
+          WLS_absLength_shifted.push_back(0.0 * m);
+        } else {
+        WLS_absLength_shifted.push_back(WLS_absLength[i] + rand_wls * DlWLS[i] * mm);
+      }
+    }
+  }
+    
+  
+    mpt->AddProperty("WLSABSLENGTH", WLS_abs_energy, WLS_absLength_shifted);
+
+    // WLS EMISSION SPECTRUM
+    std::vector<G4double> WLS_emi_energy = {
+      optPhotMinE_,
+      h_Planck * c_light / (650. * nm),  h_Planck * c_light / (600. * nm),
+      h_Planck * c_light / (595. * nm),  h_Planck * c_light / (590. * nm),
+      h_Planck * c_light / (585. * nm),  h_Planck * c_light / (580. * nm),
+      h_Planck * c_light / (575. * nm),  h_Planck * c_light / (570. * nm),
+      h_Planck * c_light / (565. * nm),  h_Planck * c_light / (560. * nm),
+      h_Planck * c_light / (555. * nm),  h_Planck * c_light / (550. * nm),
+      h_Planck * c_light / (545. * nm),  h_Planck * c_light / (540. * nm),
+      h_Planck * c_light / (535. * nm),  h_Planck * c_light / (530. * nm),
+      h_Planck * c_light / (525. * nm),  h_Planck * c_light / (520. * nm),
+      h_Planck * c_light / (515. * nm),  h_Planck * c_light / (510. * nm),
+      h_Planck * c_light / (505. * nm),  h_Planck * c_light / (500. * nm),
+      h_Planck * c_light / (495. * nm),  h_Planck * c_light / (490. * nm),
+      h_Planck * c_light / (485. * nm),  h_Planck * c_light / (480. * nm),
+      h_Planck * c_light / (475. * nm),  h_Planck * c_light / (470. * nm),
+      h_Planck * c_light / (465. * nm),  h_Planck * c_light / (460. * nm),
+      h_Planck * c_light / (455. * nm),  h_Planck * c_light / (450. * nm),
+      optPhotMaxE_
+    };
+
+    std::vector<G4double> WLS_emiSpectrum = {
+      0.0000,
+      0.0000, 0.0533, 0.0725, 0.0789,
+      0.0853, 0.1023, 0.1215, 0.1386,
+      0.1684, 0.1855, 0.2239, 0.2729,
+      0.3091, 0.3582, 0.4136, 0.4819,
+      0.5544, 0.6290, 0.7100, 0.8017,
+      0.9126, 0.9680, 0.9893, 1.0000,
+      0.9488, 0.7228, 0.3731, 0.0938,
+      0.0128, 0.0000, 0.0000, 0.0000,
+      0.0000
+    };
+    mpt->AddProperty("WLSCOMPONENT",  WLS_emi_energy, WLS_emiSpectrum);
+
+    // WLS Delay
+    mpt->AddConstProperty("WLSTIMECONSTANT", 2.7 * ns);
+
+    // WLS Quantum Efficiency
+    mpt->AddConstProperty("WLSMEANNUMBERPHOTONS", 1.0);     // PLACEHOLDER! NOT GIVEN
 
     return mpt;
   }
@@ -2374,7 +2517,7 @@ namespace opticalprops {
     20. * m, 20. * m, 0.7 * m, 10. * cm, 1. * cm, noAbsLength_, noAbsLength_};*/
 
     std::vector<G4double> abs_energy =   {optPhotMinE_};
-    for (G4double wavelength = 705.0; wavelength >= 475.0; wavelength -= 5.0) {
+    for (G4double wavelength = 700.0; wavelength >= 485.0; wavelength -= 5.0) {
       abs_energy.push_back(h_Planck * c_light / (wavelength * nm));
   }
   abs_energy.push_back(optPhotMaxE_);
@@ -2382,16 +2525,16 @@ namespace opticalprops {
 
     std::vector<G4double> absLength = {
       noAbsLength_, noAbsLength_,
-      10.38270488 * m, 15.46184818 * m, 20.59987947 * m, 25.37241997 * m, 28.65098633 * m,
-      29.47655401 * m, 29.75640608 * m, 28.37657514 * m, 24.70067598 * m, 20.39913631 * m,
-      18.3063846 * m, 18.83082292 * m, 21.61546105 * m, 24.25488255 * m, 26.00776146 * m,
-      25.87384806 * m, 23.9606071 * m, 15.71893109 * m, 8.68756632 * m, 10.98516991 * m,
-      16.38451653 * m, 20.65322301 * m, 22.23004069 * m, 22.48418517 * m, 21.65109811 * m,
-      19.97996715 * m, 18.45771364 * m, 17.45372696 * m, 16.60127065 * m, 15.46715433 * m,
-      14.22447211 * m, 12.67125963 * m, 10.88295798 * m, 8.47831818 * m, 7.39006706 * m,
-      6.66218839 * m, 5.54058247 * m, 4.03724756 * m, 2.52988313 * m, 1.35971905 * m,
-      0.67798576 * m, 0.3393122 * m, 0.17569787 * m, 0.08956223 * m, 0.04801143 * m,
-      noAbsLength_, noAbsLength_
+      16.03681218917722 * m, 
+      21.611461388199697 * m, 27.38189288588156 * m, 32.40767873215742 * m, 33.2071475182844 * m, 32.616009875647684 * m, 
+      31.513157238949827 * m, 26.918829206812507 * m, 21.25162329582225 * m, 18.42595293958163 * m, 18.83931470939413 * m, 
+      21.924463852236258 * m, 24.66248941427003 * m, 26.93120509606516 * m, 26.845967858562894 * m, 24.70191942134064 * m, 
+      15.409126500858761 * m, 8.353609181456262 * m, 10.609310710115262 * m, 16.23361651797648 * m, 21.02023685787679 * m, 
+      23.25455730982886 * m, 23.55276835859108 * m, 22.712152284509717 * m, 20.894782088757434 * m, 19.378766187327717 * m, 
+      18.656691898886958 * m, 17.957168120860274 * m, 16.963529153670468 * m, 15.680369230084615 * m, 14.05764115798083 * m, 
+      12.097930994128031 * m, 9.27918258641436 * m, 8.165396047968619 * m, 7.461019900650543 * m, 6.256314840063829 * m, 
+      4.565851961885266 * m, 2.827679168522945 * m, 1.4692612842564508 * m, 0.6987962936492076 * m, 0.35980305506823285 * m,
+      0.18933863190329583 * m, noAbsLength_, noAbsLength_
     }; //Values from own measurement
 
     std::vector<G4double> absLength_shifted;
@@ -2402,12 +2545,16 @@ namespace opticalprops {
         absLength_shifted.push_back(noAbsLength_);
       } else {
         // Add a random shift to the absorption length in terms of sigmas of the provided Dl values
-        if (absLength[i] + rand_abs * Dl[i]<0) {
+        if (absLength[i] + rand_abs * Dl[i] * m<0.0 * m) {
           absLength_shifted.push_back(0.0 * m);
         } else {
         absLength_shifted.push_back(absLength[i] + rand_abs * Dl[i] * m);
       }
     }
+    G4cout << "Original AbsLength: " << absLength[i] / m
+       << " | rand_abs: " << rand_abs
+       << " | Dl[i]: " << Dl[i]
+       << " | Shifted AbsLength: " << absLength_shifted[i] / m << G4endl;
   }
   
 
@@ -2435,23 +2582,26 @@ namespace opticalprops {
       noAbsLength_
     };*/
 
-    // FROM MEASUREMENT
+    // FROM MEASUREMENT. Narrow values: 475-385 nm. Might overestimate PDE.
     std::vector<G4double> WLS_abs_energy =   {optPhotMinE_};
-    for (G4double wavelength = 515.0; wavelength >= 345.0; wavelength -= 5.0) {
+    for (G4double wavelength = 500.0; wavelength >= 365.0; wavelength -= 5.0) {
       WLS_abs_energy.push_back(h_Planck * c_light / (wavelength * nm));
   }
   WLS_abs_energy.push_back(optPhotMaxE_);
 
 
-    std::vector<G4double> WLS_absLength = {noAbsLength_,  noAbsLength_,
-      noAbsLength_    , noAbsLength_    , noAbsLength_    ,291.42641824 * mm,173.45493716 * mm,
-      87.4320117  * mm, 45.17226306 * mm,  4.71785395 * mm,  2.26960512 * mm,  0.985295   * mm,
-      0.48578827  * mm,  0.34113462 * mm,  0.33220063 * mm,  0.36943058 * mm,  0.38785514 * mm,
-      0.34688261  * mm,  0.29608896 * mm,  0.30134552 * mm,  0.34505744 * mm,  0.41323347 * mm,
-      0.44798632  * mm,  0.46593717 * mm,  0.54882469 * mm,  0.69142881 * mm,  0.83520546 * mm,
-      0.94529969  * mm,  0.90631703 * mm,  1.15184712 * mm,  0.67997385 * mm,  1.06110944 * mm,
-      0.90486334  * mm,  0.65424143 * mm,  0.79471656 * mm,    noAbsLength_,
-      noAbsLength_
+    /*std::vector<G4double> WLS_absLength = {noAbsLength_, noAbsLength_, 2.2098795079588323 * mm, 1.0599785007354952 * mm, 0.5302890249770792 * mm, 0.3851631894157353 * mm, 
+      0.3791436631889747 * mm, 0.4177792533284747 * mm, 0.4435197687907805 * mm, 0.3983841819461552 * mm, 0.3400125692596275 * mm, 
+      0.3457482947345668 * mm, 0.4008055566837682 * mm, 0.4788323413416279 * mm, 0.52440981553162 * mm, 0.5473383052648174 * mm, 
+      0.6373156554921885 * mm, 0.7964203866978237 * mm, 0.9715402930498029 * mm, noAbsLength_, noAbsLength_
+    };*/
+    std::vector<G4double> WLS_absLength = {
+      noAbsLength_, noAbsLength_, 2.989778324565954 * mm, 2.797222678833683 * mm, 2.727060366263123 * mm, 2.638432978336101 * mm, 
+      2.281333583052618 * mm, 1.5959055207264554 * mm, 0.8839905638079544 * mm, 0.48486803433584724 * mm, 0.3598241623006371 * mm, 
+      0.352326139502887 * mm, 0.38814656348307774 * mm, 0.40653265056208177 * mm, 0.3676677472100995 * mm, 0.314886001549878 * mm, 
+      0.32070287379810397 * mm, 0.36871805873322056 * mm, 0.43240815391028775 * mm, 0.4664982773386802 * mm, 0.48725947464982927 * mm, 
+      0.5468068108541908 * mm, 0.6681675093835286 * mm, 0.8006267314590778 * mm, 0.9102107429940766 * mm, 1.0146606456480962 * mm, 
+      1.1577094774504775 * mm, 1.2026818778058348 * mm, noAbsLength_, noAbsLength_
     };
 
     std::vector<G4double> WLS_absLength_shifted;
@@ -2462,7 +2612,7 @@ namespace opticalprops {
         WLS_absLength_shifted.push_back(noAbsLength_);
       } else {
         // Add a random number of sigmas to the absorption length in terms of the provided absolute uncertainties (DlWLS values)
-        if (WLS_absLength[i] + rand_wls * DlWLS[i]<0) {
+        if (WLS_absLength[i] + rand_wls * DlWLS[i] * mm<0.0 * mm) {
           WLS_absLength_shifted.push_back(0.0 * m);
         } else {
         WLS_absLength_shifted.push_back(WLS_absLength[i] + rand_wls * DlWLS[i] * mm);
@@ -2478,8 +2628,19 @@ namespace opticalprops {
 
     // WLS EMISSION SPECTRUM
     std::vector<G4double> WLS_emi_energy = {
-      optPhotMinE_,                      h_Planck * c_light / (580. * nm),
-      h_Planck * c_light / (550. * nm),  h_Planck * c_light / (530. * nm),
+      optPhotMinE_,                      h_Planck * c_light / (645. * nm),
+      h_Planck * c_light / (640. * nm),  h_Planck * c_light / (635. * nm),
+      h_Planck * c_light / (630. * nm),  h_Planck * c_light / (625. * nm),
+      h_Planck * c_light / (620. * nm),  h_Planck * c_light / (615. * nm),
+      h_Planck * c_light / (610. * nm),  h_Planck * c_light / (605. * nm),
+      h_Planck * c_light / (600. * nm),  h_Planck * c_light / (595. * nm),
+      h_Planck * c_light / (590. * nm),  h_Planck * c_light / (585. * nm),
+      h_Planck * c_light / (580. * nm),  h_Planck * c_light / (575. * nm),
+      h_Planck * c_light / (570. * nm),  h_Planck * c_light / (565. * nm),
+      h_Planck * c_light / (560. * nm),  h_Planck * c_light / (555. * nm),
+      h_Planck * c_light / (550. * nm),  h_Planck * c_light / (545. * nm),
+      h_Planck * c_light / (540. * nm),  h_Planck * c_light / (535. * nm),
+      h_Planck * c_light / (530. * nm),
       h_Planck * c_light / (525. * nm),  h_Planck * c_light / (520. * nm),
       h_Planck * c_light / (515. * nm),  h_Planck * c_light / (510. * nm),
       h_Planck * c_light / (505. * nm),  h_Planck * c_light / (500. * nm),
@@ -2492,8 +2653,19 @@ namespace opticalprops {
     };
 
     std::vector<G4double> WLS_emiSpectrum_raw = {
-      0.000,    0.000,   //     , 580 nm
-      0.200,    0.300,   // 550 , 530 nm
+      0.000,    0.000,   //     , 645 nm
+      0.004,    0.004,   // 640 , 635 nm
+      0.007,    0.011,   // 630 , 625 nm
+      0.011,    0.011,   // 620 , 615 nm
+      0.014,    0.018,   // 610 , 605 nm
+      0.021,    0.025,   // 600 , 595 nm
+      0.029,    0.036,   // 590 , 585 nm
+      0.043,    0.057,   // 580 , 575 nm   
+      0.075,    0.104,   // 570 , 565 nm
+      0.132,    0.164,   // 560 , 555 nm
+      0.193,    0.225,   // 550 , 545 nm
+      0.261,    0.289,   // 540 , 535 nm
+      0.300,             //       530 nm
       0.400,    0.600,   // 525 , 520 nm
       0.750,    0.750,   // 515 , 510 nm
       0.720,    0.700,   // 505 , 500 nm
@@ -2526,6 +2698,212 @@ namespace opticalprops {
 
     return mpt;
   }
+
+
+
+    /// BCF91 ///
+    G4MaterialPropertiesTable* BCF91(std::vector<G4double> DlWLS, std::vector<G4double> Dl, G4double rand_wls, G4double rand_abs)
+    {
+      // http://kuraraypsf.jp/psf/index.html
+      // http://kuraraypsf.jp/psf/ws.html
+      // Excel provided by kuraray with Tabulated WLS absorption lengths
+      G4MaterialPropertiesTable* mpt = new G4MaterialPropertiesTable();
+  
+      // REFRACTIVE INDEX
+      std::vector<G4double> ri_energy = {
+        optPhotMinE_,  optPhotMaxE_
+      };
+      std::vector<G4double> rIndex = {
+        1.59,  1.59
+      };
+      mpt->AddProperty("RINDEX", ri_energy, rIndex);
+  
+      // ABSORPTION LENGTH
+      /*std::vector<G4double> abs_energy = {optPhotMinE_,
+        h_Planck * c_light / (750. * nm), h_Planck * c_light / (740. * nm), h_Planck * c_light / (380. * nm), h_Planck * c_light / (370. * nm),
+        optPhotMaxE_};
+      std::vector<G4double> absLength = {noAbsLength_,
+        noAbsLength_, 3.5 * m, 3.5 * m, noAbsLength_,
+        noAbsLength_};*/
+  
+      /*std::vector<G4double> abs_energy =   {optPhotMinE_, 
+      h_Planck * c_light / (650.0 * nm),
+      h_Planck * c_light / (600.0 * nm),
+      h_Planck * c_light / (550.0 * nm),
+      h_Planck * c_light / (530.0 * nm),
+      h_Planck * c_light / (510.0 * nm),
+      h_Planck * c_light / (475.0 * nm),
+      h_Planck * c_light / (400.0 * nm),
+      optPhotMaxE_};
+      std::vector<G4double> absLength = {noAbsLength_, noAbsLength_,
+      20. * m, 20. * m, 0.7 * m, 10. * cm, 1. * cm, noAbsLength_, noAbsLength_};*/
+  
+      std::vector<G4double> abs_energy =   {optPhotMinE_};
+      for (G4double wavelength = 555.0; wavelength >= 485.0; wavelength -= 5.0) {
+        abs_energy.push_back(h_Planck * c_light / (wavelength * nm));
+    }
+    abs_energy.push_back(optPhotMaxE_);
+  
+  
+      std::vector<G4double> absLength = {
+        noAbsLength_, noAbsLength_,
+        34.80831911429049 * m, 
+        29.69613224894329 * m, 22.48120500319037 * m, 13.530499541693313 * m, 10.58324267838602 * m, 10.210327234177294 * m, 
+        10.15140633204591 * m, 8.541486902869504 * m, 5.7125854912876495 * m, 2.986091329117266 * m, 1.2872670096666696 * m, 
+        0.5544932053427037 * m, 0.2673492248327196 * m,
+        noAbsLength_, noAbsLength_
+      }; //Values from own measurement
+  
+      std::vector<G4double> absLength_shifted;
+      absLength_shifted.reserve(absLength.size());
+  
+      for (size_t i = 0; i < absLength.size(); ++i) {
+        if (absLength[i] == noAbsLength_) {
+          absLength_shifted.push_back(noAbsLength_);
+        } else {
+          // Add a random shift to the absorption length in terms of sigmas of the provided Dl values
+          if (absLength[i] + rand_abs * Dl[i] * m<0.0 * m) {
+            absLength_shifted.push_back(0.0 * m);
+          } else {
+          absLength_shifted.push_back(absLength[i] + rand_abs * Dl[i] * m);
+        }
+      }
+    }
+    
+  
+      mpt->AddProperty("ABSLENGTH", abs_energy, absLength_shifted);
+  
+      // WLS ABSORPTION LENGTH
+      /*std::vector<G4double> WLS_abs_energy = {
+        optPhotMinE_,h_Planck * c_light / (520. * nm),h_Planck * c_light / (510. * nm),
+        h_Planck * c_light / (500. * nm),  h_Planck * c_light / (490. * nm),
+        h_Planck * c_light / (485. * nm),  h_Planck * c_light / (475. * nm),
+        h_Planck * c_light / (454. * nm),  h_Planck * c_light / (443. * nm),
+        h_Planck * c_light / (430. * nm),  h_Planck * c_light / (410. * nm),
+        h_Planck * c_light / (405. * nm),  h_Planck * c_light / (359. * nm),
+        h_Planck * c_light / (350. * nm),  h_Planck * c_light / (345. * nm),
+        optPhotMaxE_
+      };
+      std::vector<G4double> WLS_absLength = {
+        noAbsLength_,  noAbsLength_, 100.*cm,   //     , 510 nm
+        10.   * cm,    1.   * cm,       // 500 , 490 nm
+        44.2  * mm,    5.39 * mm,       // 485 , 475 nm
+        0.395 * mm,    0.462 * mm,      // 454 , 443 nm
+        0.354 * mm,    0.571 * mm,      // 430 , 410 nm
+        0.612 * mm,    4.51 * mm,       // 405 , 359 nm
+        4.81  * mm,    noAbsLength_,    // 350 , 345 nm
+        noAbsLength_
+      };*/
+  
+      // FROM MEASUREMENT
+      std::vector<G4double> WLS_abs_energy =   {optPhotMinE_};
+      for (G4double wavelength = 500.0; wavelength >= 365.0; wavelength -= 5.0) {
+        WLS_abs_energy.push_back(h_Planck * c_light / (wavelength * nm));
+    }
+    WLS_abs_energy.push_back(optPhotMaxE_);
+  
+  
+      std::vector<G4double> WLS_absLength = {noAbsLength_, noAbsLength_, 2.5047738711101584 * mm, 2.4269268890475115 * mm, 2.224466333211696 * mm, 2.2396500255832876 * mm, 
+        1.997490023307646 * mm, 1.4647025722075995 * mm, 0.8368920360827146 * mm, 0.45923547064164694 * mm, 0.339608505901566 * mm, 
+        0.33227987286089217 * mm, 0.36441147254510653 * mm, 0.3816986758739205 * mm, 0.34834731185505463 * mm, 0.3023650706746116 * mm, 
+        0.30629471460557367 * mm, 0.34841392204230803 * mm, 0.40570833279046503 * mm, 0.4434852977969391 * mm, 0.46284393036617577 * mm, 
+        0.5176659665460104 * mm, 0.6273400346830413 * mm, 0.7459757393159454 * mm, 0.8126365459246101 * mm, 0.8888466905314314 * mm, 
+        0.913442925983448 * mm, 0.9075687008268998 * mm, noAbsLength_, noAbsLength_};
+  
+      std::vector<G4double> WLS_absLength_shifted;
+      WLS_absLength_shifted.reserve(WLS_absLength.size());
+  
+      for (size_t i = 0; i < WLS_absLength.size(); ++i) {
+        if (WLS_absLength[i] == noAbsLength_) {
+          WLS_absLength_shifted.push_back(noAbsLength_);
+        } else {
+          // Add a random number of sigmas to the absorption length in terms of the provided absolute uncertainties (DlWLS values)
+          if (WLS_absLength[i] + rand_wls * DlWLS[i] * mm<0.0 * mm) {
+            WLS_absLength_shifted.push_back(0.0 * m);
+          } else {
+          WLS_absLength_shifted.push_back(WLS_absLength[i] + rand_wls * DlWLS[i] * mm);
+        }
+      }
+    }
+      
+      mpt->AddProperty("WLSABSLENGTH", WLS_abs_energy, WLS_absLength_shifted);
+      //for (int i=0; i<WLS_abs_entries; i++)
+      //  G4cout << "* Y11 WLS absLength:  " << std::setw(8) << WLS_abs_energy[i] / eV
+      //         << " eV  ==  " << std::setw(8) << (h_Planck * c_light / WLS_abs_energy[i]) / nm
+      //         << " nm  ->  " << std::setw(6) << WLS_absLength[i] / mm << " mm" << G4endl;
+  
+      // WLS EMISSION SPECTRUM
+      std::vector<G4double> WLS_emi_energy = {
+        optPhotMinE_,                      h_Planck * c_light / (645. * nm),
+        h_Planck * c_light / (640. * nm),  h_Planck * c_light / (635. * nm),
+        h_Planck * c_light / (630. * nm),  h_Planck * c_light / (625. * nm),
+        h_Planck * c_light / (620. * nm),  h_Planck * c_light / (615. * nm),
+        h_Planck * c_light / (610. * nm),  h_Planck * c_light / (605. * nm),
+        h_Planck * c_light / (600. * nm),  h_Planck * c_light / (595. * nm),
+        h_Planck * c_light / (590. * nm),  h_Planck * c_light / (585. * nm),
+        h_Planck * c_light / (580. * nm),  h_Planck * c_light / (575. * nm),
+        h_Planck * c_light / (570. * nm),  h_Planck * c_light / (565. * nm),
+        h_Planck * c_light / (560. * nm),  h_Planck * c_light / (555. * nm),
+        h_Planck * c_light / (550. * nm),  h_Planck * c_light / (545. * nm),
+        h_Planck * c_light / (540. * nm),  h_Planck * c_light / (535. * nm),
+        h_Planck * c_light / (530. * nm),
+        h_Planck * c_light / (525. * nm),  h_Planck * c_light / (520. * nm),
+        h_Planck * c_light / (515. * nm),  h_Planck * c_light / (510. * nm),
+        h_Planck * c_light / (505. * nm),  h_Planck * c_light / (500. * nm),
+        h_Planck * c_light / (495. * nm),  h_Planck * c_light / (490. * nm),
+        h_Planck * c_light / (485. * nm),  h_Planck * c_light / (480. * nm),
+        h_Planck * c_light / (475. * nm),  h_Planck * c_light / (470. * nm),
+        h_Planck * c_light / (465. * nm),  h_Planck * c_light / (460. * nm),
+        h_Planck * c_light / (455. * nm),  h_Planck * c_light / (450. * nm),
+        h_Planck * c_light / (445. * nm),  optPhotMaxE_
+      };
+  
+      std::vector<G4double> WLS_emiSpectrum_raw = {
+        0.000,    0.000,   //     , 645 nm
+        0.004,    0.004,   // 640 , 635 nm
+        0.007,    0.011,   // 630 , 625 nm
+        0.011,    0.011,   // 620 , 615 nm
+        0.014,    0.018,   // 610 , 605 nm
+        0.021,    0.025,   // 600 , 595 nm
+        0.029,    0.036,   // 590 , 585 nm
+        0.043,    0.057,   // 580 , 575 nm   
+        0.075,    0.104,   // 570 , 565 nm
+        0.132,    0.164,   // 560 , 555 nm
+        0.193,    0.225,   // 550 , 545 nm
+        0.261,    0.289,   // 540 , 535 nm
+        0.300,             //       530 nm
+        0.400,    0.600,   // 525 , 520 nm
+        0.750,    0.750,   // 515 , 510 nm
+        0.720,    0.700,   // 505 , 500 nm
+        0.680,    0.650,   // 495 , 490 nm
+        0.700,    0.900,   // 485 , 480 nm
+        1.000,    0.950,   // 475 , 470 nm
+        0.500,    0.300,   // 465 , 460 nm
+        0.100,    0.050,   // 455 , 450 nm
+        0.000,    0.000    // 445 ,     nm
+      };
+  
+      std::vector<G4double> WLS_emiSpectrum;
+      WLS_emiSpectrum.reserve(WLS_emi_energy.size());
+  
+      for (size_t i = 0; i < WLS_emi_energy.size(); ++i) {
+        if (WLS_emiSpectrum_raw[i] == 0.000) {
+          WLS_emiSpectrum.push_back(0.000);
+        } else {
+          // Apply Jacobian of transformation to convert from wavelength to energy spectrum
+          WLS_emiSpectrum.push_back(WLS_emiSpectrum_raw[i]* h_Planck * c_light / (WLS_emi_energy[i] * WLS_emi_energy[i]));
+        }
+      }
+      mpt->AddProperty("WLSCOMPONENT",  WLS_emi_energy, WLS_emiSpectrum);
+  
+      // WLS Delay
+      mpt->AddConstProperty("WLSTIMECONSTANT", 8.5 * ns);
+  
+      // WLS Quantum Efficiency
+      mpt->AddConstProperty("WLSMEANNUMBERPHOTONS", 1.0);
+  
+      return mpt;
+    }
 
 
 /// B-2 ///
@@ -2700,7 +3078,7 @@ namespace opticalprops {
 
     // ABSORPTION LENGTH
     std::vector<G4double> abs_energy = {optPhotMinE_, optPhotMaxE_};
-    std::vector<G4double> absLength  = {noAbsLength_, noAbsLength_};
+    std::vector<G4double> absLength  = {2*mm, 2*mm};
     mpt->AddProperty("ABSLENGTH", abs_energy, absLength);
 
     return mpt;
@@ -2737,6 +3115,34 @@ namespace opticalprops {
 
     return mpt;
   }
+
+
+  /// PMMA == PolyMethylmethacrylate in outer cladding ///
+  G4MaterialPropertiesTable* PMMA_outer()
+  {
+    // Fiber cladding material.
+    // Properties from geant4/examples/extended/optical/wls
+    G4MaterialPropertiesTable* mpt = new G4MaterialPropertiesTable();
+
+    // REFRACTIVE INDEX
+    std::vector<G4double> rIndex_energies = {optPhotMinE_, optPhotMaxE_};
+    std::vector<G4double> rIndex          = {1.49, 1.49};
+    mpt->AddProperty("RINDEX", rIndex_energies, rIndex);
+
+    // ABSORPTION LENGTH
+    std::vector<G4double> abs_energy = {
+      optPhotMinE_,
+      optPhotMaxE_
+    };
+    std::vector<G4double> abslength = {
+      2 * mm, 2 * mm
+    };
+    mpt->AddProperty("ABSLENGTH", abs_energy, abslength);
+
+    return mpt;
+  }
+
+
    /// Perfect absorber (for efficiency tests) ///
   G4MaterialPropertiesTable* PerfectAbsorber()
   {

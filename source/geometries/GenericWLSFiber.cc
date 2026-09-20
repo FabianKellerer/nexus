@@ -85,11 +85,16 @@ void GenericWLSFiber::ComputeDimensions()
 void GenericWLSFiber::DefineMaterials()
 {
   // Fiber cladding materials to be used ...
-  // PMMA:       in single cladding, and for inner in muticladding
+  // PMMA:       in single cladding, and for inner in muticladding !!if outer in single cladding, PMMA_outer needs to be used!!
   // FPethylene: for outer in muticladding
 
   iclad_mat_ = materials::PMMA();
-  iclad_mat_->SetMaterialPropertiesTable(opticalprops::PMMA());
+  if (doubleclad_) {
+    iclad_mat_->SetMaterialPropertiesTable(opticalprops::PMMA());
+  } else {
+    iclad_mat_->SetMaterialPropertiesTable(opticalprops::PMMA_outer());
+  }
+  
 
   // If 2 claddings, defining the outer cladding material
   if (doubleclad_) {

@@ -40,14 +40,17 @@ namespace nexus
         G4bool   al_;         //aluminises fibers
         G4bool   tefl_;       //puts teflon block behind fibers
         G4bool   isround_;    //if false: square fibers
+        G4bool   doubleclad_; //if true: double cladding, if false: single cladding
         G4double thickness_;  //thickness of the photosensor
         G4String core_mat_;   //core material of the fibre (EJ280, EJ286 or Y11)
         G4String sensortype_; //photosensor type (PMT at fibre end or SiPM opposite light source)
+        G4String sensor_pos_;  //position of the sensor (end or side)
         G4int    num_fibers_; //number of fibres in the bundle
         G4double lamp_size_;  //size of photon generation region in z direction if LAMP region is chosen
         G4double gap_;        //size of gap between fiber and sensor
         G4double rand_wls_;   //number of sigmas of the WLS uncertainty to shift the WLS abs. length by
         G4double rand_att_;   //number of sigmas of the attenuation uncertainty to shift
+        G4double rand_sigma_; //number of sigmas of the radial distribution uncertainty to shift the radial distribution by
 
         GenericPhotosensor*   sensor_;
         G4GenericMessenger*   msg_;

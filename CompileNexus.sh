@@ -1,4 +1,4 @@
 #!/bin/bash
 
-sudo cmake -DCMAKE_INSTALL_PREFIX=/Users/fabian/Documents/nexus/ -S . -B /Users/fabian/Documents/nexus/build
-sudo cmake --build /Users/fabian/Documents/nexus/build --target install -j 8
+cmake -DCMAKE_INSTALL_PREFIX=/lhome/ific/f/fkellere/NEWCalibMC/nexus/ -S . -B /lhome/ific/f/fkellere/NEWCalibMC/nexus/build
+cmake --build /lhome/ific/f/fkellere/NEWCalibMC/nexus/build --target install -j 8
