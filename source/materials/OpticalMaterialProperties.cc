@@ -3078,7 +3078,7 @@ namespace opticalprops {
 
     // ABSORPTION LENGTH
     std::vector<G4double> abs_energy = {optPhotMinE_, optPhotMaxE_};
-    std::vector<G4double> absLength  = {2*mm, 2*mm};
+    std::vector<G4double> absLength  = {1000*mm, 1000*mm};
     mpt->AddProperty("ABSLENGTH", abs_energy, absLength);
 
     return mpt;
@@ -3141,6 +3141,195 @@ namespace opticalprops {
 
     return mpt;
   }
+
+
+  /// Generic material, to be modifed by the user ///
+  G4MaterialPropertiesTable* Steel()
+  {
+    // Playing material properties
+    G4MaterialPropertiesTable* mpt = new G4MaterialPropertiesTable();
+    // REFLECTIVITY
+    std::vector<G4double> ENERGIES = {
+      optPhotMinE_,  2.8 * eV,  3.5 * eV,  4. * eV,
+      6. * eV,       7.2 * eV,  optPhotMaxE_
+    };
+    // std::vector<G4double> REFLECTIVITY = {
+    //   0.5,  0.4,  0.4,  0.35,
+    //   0.1,  0.1,  0.1
+    // };
+    std::vector<G4double> REFLECTIVITY = {
+      0.0,  0.0,  0.0,  0.0,
+      0.0,  0.0,  0.0
+    };
+    // https://link.springer.com/chapter/10.1007/978-3-031-23050-9_11
+    mpt->AddProperty("REFLECTIVITY", ENERGIES, REFLECTIVITY);
+
+    // REFLEXION BEHAVIOR
+    std::vector<G4double> ENERGIES_2    = {optPhotMinE_, optPhotMaxE_};
+    // Specular reflection about the normal to a microfacet.
+    // Such a vector is chosen according to a gaussian distribution with
+    // sigma = SigmaAlhpa (in rad) and centered in the average normal.
+    std::vector<G4double> specularlobe  = {0., 0.};
+    // specular reflection about the average normal
+    std::vector<G4double> specularspike = {0., 0.};
+    // 180 degrees reflection.
+    std::vector<G4double> backscatter   = {0., 0.};
+    // 1 - the sum of these three last parameters is the percentage of Lambertian reflection
+
+    mpt->AddProperty("SPECULARLOBECONSTANT", ENERGIES_2, specularlobe);
+    mpt->AddProperty("SPECULARSPIKECONSTANT",ENERGIES_2, specularspike);
+    mpt->AddProperty("BACKSCATTERCONSTANT",  ENERGIES_2, backscatter);
+    // https://www.researchgate.net/publication/241649116_Effects_of_Radiation_and_Thermal_Cycling_on_Teflon_R_FEP
+    G4double abs_length   = 0.000001*micrometer;
+    std::vector<G4double> abs_energy = {optPhotMinE_, optPhotMaxE_};
+    std::vector<G4double> absLength  = {abs_length, abs_length};
+    mpt->AddProperty("ABSLENGTH", abs_energy, absLength);
+
+    // REFRACTIVE INDEX
+    std::vector<G4double> rIndex = {1.41, 1.41};
+    // std::vector<G4double> rIndex = {10, 10};
+    mpt->AddProperty("RINDEX", ENERGIES_2, rIndex);
+
+
+
+    return mpt;
+  }
+
+    /// Gaseous ArXe ///
+  G4MaterialPropertiesTable* GArXe(G4double sc_yield,
+    G4double e_lifetime, G4int ppm, G4double pressure) // Add Xenon concentration in ppm
+{
+G4MaterialPropertiesTable* mpt = new G4MaterialPropertiesTable();
+
+// REFRACTIVE INDEX
+const G4int ri_entries = 200;
+G4double eWidth = (optPhotMaxE_ - optPhotMinE_) / ri_entries;
+
+std::vector<G4double> ri_energy;
+for (int i=0; i<ri_entries; i++) {
+ri_energy.push_back(optPhotMinE_ + i * eWidth);
+}
+
+std::vector<G4double> rIndex;
+for (int i=0; i<ri_entries; i++) {
+G4double wl = hc_ / ri_energy[i] * 1000; // in micron
+// From refractiveindex.info
+rIndex.push_back(1 + 0.012055*(0.2075*pow(wl,2)/(91.012*pow(wl,2)-1) +
+        0.0415*pow(wl,2)/(87.892*pow(wl,2)-1) +
+        4.3330*pow(wl,2)/(214.02*pow(wl,2)-1)));
+G4cout << "* GArXe rIndex:  " << std::setw(5) << ri_energy[i]/eV
+<< " eV -> " << rIndex[i] << G4endl;
+}
+mpt->AddProperty("RINDEX", ri_energy, rIndex);
+
+// ABSORPTION LENGTH
+std::vector<G4double> abs_energy = {optPhotMinE_, optPhotMaxE_};
+std::vector<G4double> absLength  = {noAbsLength_, noAbsLength_};
+mpt->AddProperty("ABSLENGTH", abs_energy, absLength);
+
+// EMISSION SPECTRUM
+// Sampling from ~150 nm to 200 nm <----> from 6.20625 eV to 8.20625 eV
+const G4int sc_entries = 200;
+std::vector<G4double> sc_energy;
+for (int i=0; i<sc_entries; i++){
+sc_energy.push_back(6.20625 * eV + 0.01 * i * eV);
+}
+std::vector<G4double> intensity;
+for (G4int i=0; i<sc_entries; i++) {
+intensity.push_back(GXeScintillation(sc_energy[i], pressure));
+}
+//for (int i=0; i<sc_entries; i++) {
+//  G4cout << "* GXe Scint:  " << std::setw(7) << sc_energy[i]/eV
+//         << " eV -> " << intensity[i] << G4endl;
+//}
+mpt->AddProperty("SCINTILLATIONCOMPONENT1", sc_energy, intensity);
+mpt->AddProperty("SCINTILLATIONCOMPONENT2", sc_energy, intensity);
+mpt->AddProperty("ELSPECTRUM"             , sc_energy, intensity, 1);
+
+// CONST PROPERTIES
+mpt->AddConstProperty("SCINTILLATIONYIELD", sc_yield);
+mpt->AddConstProperty("RESOLUTIONSCALE",    1.0);
+mpt->AddConstProperty("SCINTILLATIONTIMECONSTANT1",   4.5  * ns);
+mpt->AddConstProperty("SCINTILLATIONTIMECONSTANT2",   100. * ns);
+mpt->AddConstProperty("SCINTILLATIONYIELD1", .1);
+mpt->AddConstProperty("SCINTILLATIONYIELD2", .9);
+mpt->AddConstProperty("ATTACHMENT",         e_lifetime, 1);
+
+return mpt;
+}
+
+
+/// Generic material, to be modifed by the user ///
+G4MaterialPropertiesTable* GTest(G4double pressure,
+  G4double /*temperature*/,
+ G4int    sc_yield,
+ G4double e_lifetime)
+{
+// An argon gas proportional scintillation counter with UV avalanche photodiode scintillation
+// readout C.M.B. Monteiro, J.A.M. Lopes, P.C.P.S. Simoes, J.M.F. dos Santos, C.A.N. Conde
+//
+// May 2023:
+// Updated scintillation decay and yields from:
+// Triplet Lifetime in Gaseous Argon. Michael Akashi-Ronquest et al.
+G4MaterialPropertiesTable* mpt = new G4MaterialPropertiesTable();
+
+// REFRACTIVE INDEX
+const G4int ri_entries = 200;
+G4double eWidth = (optPhotMaxE_ - optPhotMinE_) / ri_entries;
+
+std::vector<G4double> ri_energy;
+for (int i=0; i<ri_entries; i++) {
+ri_energy.push_back(optPhotMinE_ + i * eWidth);
+}
+
+G4double density = GXeDensity(pressure);
+std::vector<G4double> rIndex;
+for (int i=0; i<ri_entries; i++) {
+rIndex.push_back(XenonRefractiveIndex(ri_energy[i], density));
+// G4cout << "* GXe rIndex:  " << std::setw(7)
+//        << ri_energy[i]/eV << " eV -> " << rIndex[i] << G4endl;
+}
+mpt->AddProperty("RINDEX", ri_energy, rIndex, ri_entries);
+
+// ABSORPTION LENGTH
+std::vector<G4double> abs_energy = {optPhotMinE_, optPhotMaxE_};
+std::vector<G4double> absLength  = {noAbsLength_, noAbsLength_};
+mpt->AddProperty("ABSLENGTH", abs_energy, absLength);
+
+// EMISSION SPECTRUM
+G4double Wavelength_peak  = 128.000 * nm;
+G4double Wavelength_sigma =   2.929 * nm;
+G4double Energy_peak  = (hc_ / Wavelength_peak);
+G4double Energy_sigma = (hc_ * Wavelength_sigma / pow(Wavelength_peak,2));
+//G4cout << "*** GAr Energy_peak: " << Energy_peak/eV << " eV   Energy_sigma: "
+//       << Energy_sigma/eV << " eV" << G4endl;
+
+// Sampling from ~110 nm to 150 nm <----> from ~11.236 eV to 8.240 eV
+const G4int sc_entries = 380;
+std::vector<G4double> sc_energy;
+std::vector<G4double> intensity;
+for (int i=0; i<sc_entries; i++){
+sc_energy.push_back(8.240*eV + 0.008*i*eV);
+intensity.push_back(exp(-pow(Energy_peak/eV-sc_energy[i]/eV,2) /
+(2*pow(Energy_sigma/eV, 2)))/(Energy_sigma/eV*sqrt(pi*2.)));
+//G4cout << "* GAr energy: " << std::setw(6) << sc_energy[i]/eV << " eV  ->  "
+//       << std::setw(6) << intensity[i] << G4endl;
+}
+mpt->AddProperty("SCINTILLATIONCOMPONENT1", sc_energy, intensity);
+mpt->AddProperty("SCINTILLATIONCOMPONENT2", sc_energy, intensity);
+mpt->AddProperty("ELSPECTRUM"             , sc_energy, intensity, 1);
+
+// CONST PROPERTIES
+mpt->AddConstProperty("SCINTILLATIONYIELD", sc_yield);
+mpt->AddConstProperty("SCINTILLATIONTIMECONSTANT1",   6.*ns);
+mpt->AddConstProperty("SCINTILLATIONTIMECONSTANT2",   3480.*ns);
+mpt->AddConstProperty("SCINTILLATIONYIELD1", .136);
+mpt->AddConstProperty("SCINTILLATIONYIELD2", .864);
+mpt->AddConstProperty("RESOLUTIONSCALE",    1.0);
+mpt->AddConstProperty("ATTACHMENT",         e_lifetime, 1);
+
+return mpt;
+}
 
 
    /// Perfect absorber (for efficiency tests) ///

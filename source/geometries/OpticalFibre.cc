@@ -44,7 +44,7 @@ using namespace CLHEP;
 REGISTER_CLASS(OpticalFibre,GeometryBase)
 
 OpticalFibre::OpticalFibre():
-    GeometryBase(), radius_(1.*mm), length_(1.*cm), fiber_dist_(0.*mm), doubleclad_(true), al_(true), tefl_(false), isround_(true), core_mat_("EJ280"), sensortype_("PMT"), num_fibers_(1), lamp_size_(1.*cm), gap_(0.1*mm), rand_wls_(0), rand_att_(0), rand_sigma_(0), qe_(1), cyl_vertex_gen_(0)
+    GeometryBase(), radius_(1.*mm), length_(1.*cm), fiber_dist_(0.*mm), doubleclad_(true), al_(true), tefl_(false), spec_(false), isround_(true), core_mat_("EJ280"), sensortype_("PMT"), num_fibers_(1), lamp_size_(1.*cm), gap_(0.1*mm), rand_wls_(0), rand_att_(0), rand_sigma_(0), qe_(1), cyl_vertex_gen_(0)
     {
         msg_=new G4GenericMessenger(this,"/Geometry/OpticalFibre/","Control commands of geometry OpticalFibre");
 
@@ -73,6 +73,10 @@ OpticalFibre::OpticalFibre():
         G4GenericMessenger::Command& tefl_cmd =
             msg_->DeclareProperty("teflon",tefl_,"Teflon block behind fibers yes or no");
         tefl_cmd.SetParameterName("tefl_cmd",false);
+
+        G4GenericMessenger::Command& spec_cmd =
+            msg_->DeclareProperty("spectrometer",spec_,"Spectrometer behind fibers yes or no");
+        spec_cmd.SetParameterName("spec_cmd",false);
 
         G4GenericMessenger::Command& shape_cmd =
             msg_->DeclareProperty("shape",isround_,"Shape of the fibers (round or square)");
@@ -408,7 +412,7 @@ G4Box* lab_solid = new G4Box("LAB", xlab,ylab,length_+gap_+1.*cm);
     }
 
     // Reflective volume behind the fibers to increase efficiency (Teflon block)
-    /*if(tefl_) {
+    if(tefl_) {
         G4Box* tefl_box = new G4Box("TEFL",0.2*mm,ylab/2,lamp_size_);
         G4LogicalVolume* tefl_log = new G4LogicalVolume(tefl_box,teflon,"TEFL");
         //G4OpticalSurface* opsur_teflon = new G4OpticalSurface("TEFLON_OPSURF", unified, ground, dielectric_metal);
@@ -416,13 +420,14 @@ G4Box* lab_solid = new G4Box("LAB", xlab,ylab,length_+gap_+1.*cm);
         //new G4LogicalSkinSurface("TEFLON_OPSURF", tefl_log, opsur_teflon);
         new G4PVPlacement(0,G4ThreeVector((xlab+2*radius_)/2-0.2*mm,(ylab-2.*radius_)/2,-5*mm),tefl_log,tefl_log->GetName(),lab_logic,true,cntr,true);
         cntr+=1;
-    }*/
-    if(tefl_) {
+    }
+    // Spectrometer volume to measure the WLS absorption of the fibers
+    if(spec_) {
         G4Tubs* spectrometer = new G4Tubs("SPEC",0,0.1*mm,0.01*mm,0,2*pi);
         G4LogicalVolume* spec_log = new G4LogicalVolume(spectrometer,teflon,"SPEC");
         G4RotationMatrix spec_rot;
         spec_rot.rotateY(pi/2);
-        G4ThreeVector spec_pos = G4ThreeVector((xlab+radius_)/2-0.2*mm,(ylab-2.*radius_)/2,-5*mm);
+        G4ThreeVector spec_pos = G4ThreeVector((xlab)/2+0.02*mm,(ylab-2.*radius_)/2,-5*mm);
         new G4PVPlacement(G4Transform3D(spec_rot,spec_pos),spec_log,spec_log->GetName(),lab_logic,true,cntr,true);
         cntr+=1;
     }

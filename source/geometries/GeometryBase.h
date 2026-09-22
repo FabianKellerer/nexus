@@ -34,6 +34,12 @@ namespace nexus {
     /// Returns a point within a given region of the geometry
     virtual G4ThreeVector GenerateVertex(const G4String&) const;
 
+    /// Returns a point within a region projecting from a
+    /// given point backwards along a line.
+    virtual G4ThreeVector ProjectToRegion(const G4String&,
+					  const G4ThreeVector&,
+					  const G4ThreeVector&) const;
+
     /// Returns the span (maximum dimension) of the geometry
     G4double GetSpan();
 
@@ -48,6 +54,12 @@ namespace nexus {
 
     /// Setter for the starting point of EL generation in z
     void SetELzCoord(G4double z);
+
+    /// Getter for the origin of coordinates
+    G4ThreeVector GetCoordOrigin() const;
+
+    /// Setter for the origin of coordinates
+    void SetCoordOrigin(G4ThreeVector origin);
 
     /// Translates position to G4 global position
     void CalculateGlobalPos(G4ThreeVector& vertex) const;
@@ -84,12 +96,13 @@ namespace nexus {
     G4ThreeVector dimensions_; ///< XYZ dimensions of a regular geometry
     G4bool drift_; ///< True if geometry contains a drift field (for hit coordinates)
     G4double el_z_; ///< Starting point of EL generation in z
+    G4ThreeVector coord_origin_; ///< Origin of coordinates of the mother volume
   };
 
 
   // Inline definitions ///////////////////////////////////
 
-  inline GeometryBase::GeometryBase(): logicVol_(0), span_(25.*m), drift_(false), el_z_(0.*mm) {}
+  inline GeometryBase::GeometryBase(): logicVol_(0), span_(25.*m),  el_z_(0.*mm), coord_origin_(G4ThreeVector(0., 0., 0.)) {}
 
   inline GeometryBase::~GeometryBase() {}
 
@@ -100,6 +113,11 @@ namespace nexus {
   { logicVol_ = lv; }
 
   inline G4ThreeVector GeometryBase::GenerateVertex(const G4String&) const
+  { return G4ThreeVector(0., 0., 0.); }
+
+  inline G4ThreeVector GeometryBase::ProjectToRegion(const G4String&,
+						     const G4ThreeVector&,
+						     const G4ThreeVector&) const
   { return G4ThreeVector(0., 0., 0.); }
 
   inline void GeometryBase::SetSpan(G4double s) { span_ = s; }
@@ -117,6 +135,10 @@ namespace nexus {
   inline G4double GeometryBase::GetELzCoord() const {return el_z_;}
 
   inline void GeometryBase::SetELzCoord(G4double z) {el_z_ = z;}
+
+  inline G4ThreeVector GeometryBase::GetCoordOrigin() const {return coord_origin_;}
+
+  inline void GeometryBase::SetCoordOrigin(G4ThreeVector origin) {coord_origin_ = origin;}
 
   // This methods is to be used only in the Next1EL and NEW geometries
   inline void GeometryBase::CalculateGlobalPos(G4ThreeVector& vertex) const

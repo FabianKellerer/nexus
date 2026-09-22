@@ -39,6 +39,7 @@ namespace nexus
         G4double fiber_dist_; //distance between the fibers
         G4bool   al_;         //aluminises fibers
         G4bool   tefl_;       //puts teflon block behind fibers
+        G4bool   spec_;       //puts spectrometer behind fibers
         G4bool   isround_;    //if false: square fibers
         G4bool   doubleclad_; //if true: double cladding, if false: single cladding
         G4double thickness_;  //thickness of the photosensor

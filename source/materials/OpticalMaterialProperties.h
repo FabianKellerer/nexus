@@ -118,6 +118,17 @@ namespace opticalprops {
 
   G4MaterialPropertiesTable* XXX();
 
+  G4MaterialPropertiesTable* Steel();
+
+  G4MaterialPropertiesTable* GArXe(G4double sc_yield,
+    G4double e_lifetime=1000.*ms,
+    G4int ppm=1000, G4double pressure=1.0*bar);
+
+    G4MaterialPropertiesTable* GTest(G4double pressure=1.*bar,
+      G4double temperature=STP_Temperature,
+      G4int sc_yield=25510/MeV,
+      G4double e_lifetime=1000.*ms);
+
   G4MaterialPropertiesTable* specularspikeVIKUITI();
 
   G4MaterialPropertiesTable* specularlobeVIKUITI();
@@ -131,6 +142,7 @@ namespace opticalprops {
   // Constant that allows to convert nm to eV:
   // nm_to_eV_ / wavelength (nm) = energy (eV)
   constexpr G4double nm_to_eV_ = h_Planck * c_light * 1.e6;
+  constexpr G4double hc_ = h_Planck * c_light;
 
 
 } // end namespace opticalprops

@@ -11,22 +11,24 @@
 /event/verbose 0
 /tracking/verbose 0
 /process/em/verbose 0
-/Geometry/OpticalFibre/teflon true
+/Geometry/OpticalFibre/teflon false
 /Geometry/OpticalFibre/length 11. cm
 /Geometry/OpticalFibre/radius 0.5 mm
-/Geometry/OpticalFibre/core_mat "Y11"
-/Geometry/OpticalFibre/num_fibers 1
+/Geometry/OpticalFibre/core_mat "BCF92"
+/Geometry/OpticalFibre/num_fibers 5
 /Geometry/OpticalFibre/fiber_dist 3 mm
-/Geometry/OpticalFibre/lamp_size 0.4 mm
+/Geometry/OpticalFibre/lamp_size 12.7 mm
 /Geometry/OpticalFibre/gap_size  0.1 mm
 /Geometry/OpticalFibre/aluminised true
 /Geometry/OpticalFibre/rand_wls 1
 /Geometry/OpticalFibre/rand_att 1
+/Geometry/OpticalFibre/qe 0.87
+/Geometry/OpticalFibre/doubleclad false
 
 /Generator/SingleParticle/particle opticalphoton
 /Generator/SingleParticle/region LAMP               ##BODY_VOL or LAMP
-/Generator/SingleParticle/min_energy 2.72 eV        ##7.08 eV for 175 nm or 2.76 eV for 450 nm blue light. 2.88 eV for Y11 absorption maximum (430 nm)
-/Generator/SingleParticle/max_energy 2.79 eV
+/Generator/SingleParticle/min_energy 3.09 eV        ##7.08 eV for 175 nm or 2.76 eV for 450 nm blue light. 2.88 eV for Y11 absorption maximum (430 nm)
+/Generator/SingleParticle/max_energy 3.11 eV
 /Generator/SingleParticle/min_costheta 0
 /Generator/SingleParticle/max_costheta 0
 /Generator/SingleParticle/min_phi 0

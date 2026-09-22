@@ -1,0 +1,85 @@
+// ----------------------------------------------------------------------------
+// nexus | Cigar.h
+//
+// Box-shaped box of material with a coating.
+//
+// The NEXT Collaboration
+// ----------------------------------------------------------------------------
+
+#ifndef Cigar_H
+#define Cigar_H
+
+#include "GeometryBase.h"
+#include "GenericWLSFiber.h"
+#include "PmtR11410.h"
+#include "BoxPointSampler.h"
+#include "CylinderPointSampler.h"
+#include "RealisticMuonPlaneSampler.h"
+#include "MaterialsList.h"
+#include "G4VSensitiveDetector.hh"
+#include "G4Step.hh"
+#include "G4TouchableHistory.hh"
+
+class G4Material;
+class G4GenericMessenger;
+namespace nexus { class SpherePointSampler; }
+
+
+namespace nexus {
+
+  /// Spherical chamber filled with xenon (liquid or gas)
+
+  class Cigar: public GeometryBase
+  {
+  public:
+    /// Constructor
+    Cigar();
+    /// Destructor
+    ~Cigar();
+
+    /// Return vertex within region <region> of the chamber
+    G4ThreeVector GenerateVertex(const G4String& region) const;
+
+    void ParticleName(G4String name);
+
+    
+
+    void Construct();
+
+  private:
+    G4double world_z_;             // World dimensions
+    G4double world_xy_;
+    G4double cigar_length_;
+    G4double cigar_width_;
+    G4double fiber_diameter_;
+    G4String gas_;
+    G4double pressure_;
+    G4String coating_;
+    G4String fiber_type_;
+    G4double rand_wls_;
+    G4double rand_att_;
+    G4bool coated_;
+    G4String opticalModel;
+
+
+    GenericWLSFiber* fiber_;
+    // BoxPointSampler* inside_cigar_;
+    CylinderPointSampler* inside_cigar_;
+    RealisticMuonPlaneSampler* muon_plane_;
+    /// Messenger for the definition of control commands
+    G4GenericMessenger* msg_;
+    G4GenericMessenger* particle_msg_;
+    G4ParticleDefinition* particle_definition_;
+
+
+    // Sensitive detector class inside the Cigar header
+    class MySensitiveDetector : public G4VSensitiveDetector {
+    public:
+        MySensitiveDetector(G4String name);
+        virtual G4bool ProcessHits(G4Step* step, G4TouchableHistory* history) override;
+    };
+  };
+
+} // end namespace nexus
+
+#endif
