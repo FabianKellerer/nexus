@@ -41,4 +41,4 @@
 /PhysicsList/Nexus/drift                true
 /PhysicsList/Nexus/electroluminescence  true
 
-/nexus/persistency/outputFile OpticalFibre.next
+/nexus/persistency/outputFile OpticalFibre_WLS

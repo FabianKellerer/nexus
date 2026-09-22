@@ -415,10 +415,10 @@ G4Box* lab_solid = new G4Box("LAB", xlab,ylab,length_+gap_+1.*cm);
     if(tefl_) {
         G4Box* tefl_box = new G4Box("TEFL",0.2*mm,ylab/2,lamp_size_);
         G4LogicalVolume* tefl_log = new G4LogicalVolume(tefl_box,teflon,"TEFL");
-        //G4OpticalSurface* opsur_teflon = new G4OpticalSurface("TEFLON_OPSURF", unified, ground, dielectric_metal);
-        //opsur_teflon->SetMaterialPropertiesTable(opticalprops::PTFE());
-        //new G4LogicalSkinSurface("TEFLON_OPSURF", tefl_log, opsur_teflon);
-        new G4PVPlacement(0,G4ThreeVector((xlab+2*radius_)/2-0.2*mm,(ylab-2.*radius_)/2,-5*mm),tefl_log,tefl_log->GetName(),lab_logic,true,cntr,true);
+        G4OpticalSurface* opsur_teflon = new G4OpticalSurface("TEFLON_OPSURF", unified, ground, dielectric_metal);
+        opsur_teflon->SetMaterialPropertiesTable(opticalprops::PTFE());
+        new G4LogicalSkinSurface("TEFLON_OPSURF", tefl_log, opsur_teflon);
+        new G4PVPlacement(0,G4ThreeVector((xlab)/2+0.21*mm,(ylab-2.*radius_)/2,-5*mm),tefl_log,tefl_log->GetName(),lab_logic,true,cntr,true);
         cntr+=1;
     }
     // Spectrometer volume to measure the WLS absorption of the fibers
