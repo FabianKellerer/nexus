@@ -2584,7 +2584,7 @@ namespace opticalprops {
 
     // FROM MEASUREMENT. Narrow values: 475-385 nm. Might overestimate PDE.
     std::vector<G4double> WLS_abs_energy =   {optPhotMinE_};
-    for (G4double wavelength = 500.0; wavelength >= 365.0; wavelength -= 5.0) {
+    for (G4double wavelength = 495.0; wavelength >= 365.0; wavelength -= 5.0) {
       WLS_abs_energy.push_back(h_Planck * c_light / (wavelength * nm));
   }
   WLS_abs_energy.push_back(optPhotMaxE_);
@@ -2596,7 +2596,7 @@ namespace opticalprops {
       0.6373156554921885 * mm, 0.7964203866978237 * mm, 0.9715402930498029 * mm, noAbsLength_, noAbsLength_
     };*/
     std::vector<G4double> WLS_absLength = {
-      noAbsLength_, noAbsLength_, 2.989778324565954 * mm, 2.797222678833683 * mm, 2.727060366263123 * mm, 2.638432978336101 * mm, 
+      noAbsLength_, noAbsLength_, 2.797222678833683 * mm, 2.727060366263123 * mm, 2.638432978336101 * mm, 
       2.281333583052618 * mm, 1.5959055207264554 * mm, 0.8839905638079544 * mm, 0.48486803433584724 * mm, 0.3598241623006371 * mm, 
       0.352326139502887 * mm, 0.38814656348307774 * mm, 0.40653265056208177 * mm, 0.3676677472100995 * mm, 0.314886001549878 * mm, 
       0.32070287379810397 * mm, 0.36871805873322056 * mm, 0.43240815391028775 * mm, 0.4664982773386802 * mm, 0.48725947464982927 * mm, 
@@ -2797,13 +2797,13 @@ namespace opticalprops {
   
       // FROM MEASUREMENT
       std::vector<G4double> WLS_abs_energy =   {optPhotMinE_};
-      for (G4double wavelength = 500.0; wavelength >= 365.0; wavelength -= 5.0) {
+      for (G4double wavelength = 495.0; wavelength >= 365.0; wavelength -= 5.0) {
         WLS_abs_energy.push_back(h_Planck * c_light / (wavelength * nm));
     }
     WLS_abs_energy.push_back(optPhotMaxE_);
   
   
-      std::vector<G4double> WLS_absLength = {noAbsLength_, noAbsLength_, 2.5047738711101584 * mm, 2.4269268890475115 * mm, 2.224466333211696 * mm, 2.2396500255832876 * mm, 
+      std::vector<G4double> WLS_absLength = {noAbsLength_, noAbsLength_, 2.4269268890475115 * mm, 2.224466333211696 * mm, 2.2396500255832876 * mm, 
         1.997490023307646 * mm, 1.4647025722075995 * mm, 0.8368920360827146 * mm, 0.45923547064164694 * mm, 0.339608505901566 * mm, 
         0.33227987286089217 * mm, 0.36441147254510653 * mm, 0.3816986758739205 * mm, 0.34834731185505463 * mm, 0.3023650706746116 * mm, 
         0.30629471460557367 * mm, 0.34841392204230803 * mm, 0.40570833279046503 * mm, 0.4434852977969391 * mm, 0.46284393036617577 * mm, 
@@ -2834,11 +2834,7 @@ namespace opticalprops {
   
       // WLS EMISSION SPECTRUM
       std::vector<G4double> WLS_emi_energy = {
-        optPhotMinE_,                      h_Planck * c_light / (645. * nm),
-        h_Planck * c_light / (640. * nm),  h_Planck * c_light / (635. * nm),
-        h_Planck * c_light / (630. * nm),  h_Planck * c_light / (625. * nm),
-        h_Planck * c_light / (620. * nm),  h_Planck * c_light / (615. * nm),
-        h_Planck * c_light / (610. * nm),  h_Planck * c_light / (605. * nm),
+        optPhotMinE_,                      
         h_Planck * c_light / (600. * nm),  h_Planck * c_light / (595. * nm),
         h_Planck * c_light / (590. * nm),  h_Planck * c_light / (585. * nm),
         h_Planck * c_light / (580. * nm),  h_Planck * c_light / (575. * nm),
@@ -2854,33 +2850,27 @@ namespace opticalprops {
         h_Planck * c_light / (485. * nm),  h_Planck * c_light / (480. * nm),
         h_Planck * c_light / (475. * nm),  h_Planck * c_light / (470. * nm),
         h_Planck * c_light / (465. * nm),  h_Planck * c_light / (460. * nm),
-        h_Planck * c_light / (455. * nm),  h_Planck * c_light / (450. * nm),
-        h_Planck * c_light / (445. * nm),  optPhotMaxE_
+        h_Planck * c_light / (455. * nm),  optPhotMaxE_
       };
   
       std::vector<G4double> WLS_emiSpectrum_raw = {
-        0.000,    0.000,   //     , 645 nm
-        0.004,    0.004,   // 640 , 635 nm
-        0.007,    0.011,   // 630 , 625 nm
-        0.011,    0.011,   // 620 , 615 nm
-        0.014,    0.018,   // 610 , 605 nm
-        0.021,    0.025,   // 600 , 595 nm
-        0.029,    0.036,   // 590 , 585 nm
-        0.043,    0.057,   // 580 , 575 nm   
-        0.075,    0.104,   // 570 , 565 nm
-        0.132,    0.164,   // 560 , 555 nm
-        0.193,    0.225,   // 550 , 545 nm
-        0.261,    0.289,   // 540 , 535 nm
-        0.300,             //       530 nm
-        0.400,    0.600,   // 525 , 520 nm
-        0.750,    0.750,   // 515 , 510 nm
-        0.720,    0.700,   // 505 , 500 nm
-        0.680,    0.650,   // 495 , 490 nm
-        0.700,    0.900,   // 485 , 480 nm
-        1.000,    0.950,   // 475 , 470 nm
-        0.500,    0.300,   // 465 , 460 nm
-        0.100,    0.050,   // 455 , 450 nm
-        0.000,    0.000    // 445 ,     nm
+        0.000,  
+        0.000,    0.006,   // 600 , 595 nm
+        0.006,    0.010,   // 590 , 585 nm
+        0.021,    0.038,   // 580 , 575 nm   
+        0.061,    0.084,   // 570 , 565 nm
+        0.105,    0.128,   // 560 , 555 nm
+        0.161,    0.205,   // 550 , 545 nm
+        0.232,    0.255,   // 540 , 535 nm
+        0.287,    0.316,   // 530 , 525 nm
+        0.358,    0.400,   // 520 , 515 nm
+        0.450,    0.525,   // 510 , 505 nm
+        0.669,    0.885,   // 500 , 495 nm
+        1.000,    0.927,   // 490 , 485 nm
+        0.860,    0.690,   // 480 , 475 nm
+        0.519,    0.184,   // 470 , 465 nm
+        0.054,    0.000,   // 460 , 455 nm
+        0.000
       };
   
       std::vector<G4double> WLS_emiSpectrum;
@@ -3135,7 +3125,7 @@ namespace opticalprops {
       optPhotMaxE_
     };
     std::vector<G4double> abslength = {
-      2 * mm, 2 * mm
+      1000 * mm, 1000 * mm
     };
     mpt->AddProperty("ABSLENGTH", abs_energy, abslength);
 
