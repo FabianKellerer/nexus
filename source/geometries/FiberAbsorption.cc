@@ -72,7 +72,7 @@ void FiberAbsorption::Construct()
     core_mat->SetMaterialPropertiesTable(opticalprops::BCF92(syst_WLSBCF92, syst_BCF92, 1, 1, 1));
     GenericWLSFiber* fiber =
     new GenericWLSFiber("FIBER", true, 2.*mm,
-                        11.*cm, true, false, materials::TPB(),
+                        11.*cm, 0.03, true, false, materials::TPB(),
                         core_mat, true);
     fiber->Construct();
     G4LogicalVolume* fiber_logic = fiber->GetLogicalVolume();

@@ -22,13 +22,13 @@
 /Geometry/OpticalFibre/aluminised true
 /Geometry/OpticalFibre/rand_wls 1
 /Geometry/OpticalFibre/rand_att 1
-/Geometry/OpticalFibre/qe 0.7
+/Geometry/OpticalFibre/qe 0.63
 /Geometry/OpticalFibre/doubleclad false
 
 /Generator/SingleParticle/particle opticalphoton
 /Generator/SingleParticle/region LAMP               ##BODY_VOL or LAMP
-/Generator/SingleParticle/min_energy 2.88 eV        ##7.08 eV for 175 nm or 2.76 eV for 450 nm blue light. 2.88 eV for Y11 absorption maximum (430 nm)
-/Generator/SingleParticle/max_energy 2.88 eV
+/Generator/SingleParticle/min_energy 3.1 eV        ##7.08 eV for 175 nm or 2.76 eV for 450 nm blue light. 2.88 eV for Y11 absorption maximum (430 nm)
+/Generator/SingleParticle/max_energy 3.1 eV
 /Generator/SingleParticle/min_costheta 0
 /Generator/SingleParticle/max_costheta 0
 /Generator/SingleParticle/min_phi 0

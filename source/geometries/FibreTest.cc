@@ -80,7 +80,7 @@ void FibreTest::Construct(){
     this->SetLogicalVolume(lab_logic);
     G4Material* ps = materials::PS();
     G4Material* tpb = materials::TPB();
-    GenericWLSFiber* fiber_ = new GenericWLSFiber("Y11", true, radius_, length_, true, true, tpb, ps, true);
+    GenericWLSFiber* fiber_ = new GenericWLSFiber("Y11", true, radius_, length_, 0.02, true, true, tpb, ps, true);
     fiber_->SetCoreOpticalProperties(opticalprops::Y11(syst_WLSY11, syst_Y11, 1, 1, 1));
     fiber_->SetCoatingOpticalProperties(opticalprops::TPB());
     fiber_->Construct();

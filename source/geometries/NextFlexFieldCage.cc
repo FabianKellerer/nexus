@@ -914,7 +914,7 @@ void NextFlexFieldCage::BuildFibersAndSensors()
   G4bool with_coating = true;
   GenericWLSFiber* fiber =
     new GenericWLSFiber("FIBER", fiber_shape_, fiber_thickness_,
-                        fiber_length, fiber_claddings_, with_coating,
+                        fiber_length, 0.02, fiber_claddings_, with_coating,
                         coating_mat_, fiber_mat_, fiber_visibility_);
   fiber->Construct();
   G4LogicalVolume* fiber_logic = fiber->GetLogicalVolume();

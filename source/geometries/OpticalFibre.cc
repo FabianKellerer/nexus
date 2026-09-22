@@ -304,9 +304,16 @@ G4Box* lab_solid = new G4Box("LAB", xlab,ylab,length_+gap_+1.*cm);
     G4bool  coating = false;
 
     //define logical volume
+    G4double clad_percent_;
+    if (core_mat_=="Y11") {
+        clad_percent_ = 0.02;
+    }
+    else {
+        clad_percent_ = 0.03;
+    }
     GenericWLSFiber* fiber =
     new GenericWLSFiber("FIBER", isround_, 2*radius_,
-                        length_, doubleclad_, coating, tpb,
+                        length_, clad_percent_, doubleclad_, coating, tpb,
                         core_mat, true);
     fiber->Construct();
     G4LogicalVolume* fiber_logic = fiber->GetLogicalVolume();

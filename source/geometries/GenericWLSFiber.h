@@ -27,6 +27,7 @@ namespace nexus {
                     G4bool      isround,            // "round"  or "square"
                     G4double    thickness,        // diameter or side
                     G4double    length,
+                    G4double    clad_percent,        // percentage of clad thickness w.r.t. diameter
                     G4bool      doubleclad,
                     G4bool      with_coating,
                     G4Material* coating_material,
@@ -63,6 +64,7 @@ namespace nexus {
     G4bool      isround_;
     G4double    thickness_;
     G4double    length_;
+    G4double    clad_percent_;
     G4double    core_rad_;
     G4double    iclad_rad_;
     G4double    oclad_rad_;

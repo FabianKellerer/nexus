@@ -121,7 +121,7 @@ namespace nexus {
       }
     }
 
-    fiber_ = new GenericWLSFiber(fiber_type_, true, fiber_radius_, length_, true, coated_, this_coating, this_fiber, true);
+    fiber_ = new GenericWLSFiber(fiber_type_, true, fiber_radius_, length_, 0.02, true, coated_, this_coating, this_fiber, true);
 
     // WORLD /////////////////////////////////////////////////
 

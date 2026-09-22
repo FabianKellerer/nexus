@@ -30,6 +30,7 @@ GenericWLSFiber::GenericWLSFiber(G4String    name,
                                  G4bool      isround,
                                  G4double    thickness,
                                  G4double    length,
+                                 G4double    clad_percent,
                                  G4bool      doubleclad,
                                  G4bool      with_coating,
                                  G4Material* coating_mat,
@@ -40,6 +41,7 @@ GenericWLSFiber::GenericWLSFiber(G4String    name,
   isround_        (isround),         // "round"  or "square"
   thickness_      (thickness),     // Diameter (for round), Side (for square)
   length_         (length),
+  clad_percent_   (clad_percent),  // Percentage of clad thickness w.r.t. diameter
   doubleclad_     (doubleclad),
   with_coating_   (with_coating),
   coating_mat_    (coating_mat),
@@ -59,8 +61,9 @@ GenericWLSFiber::~GenericWLSFiber()
 void GenericWLSFiber::ComputeDimensions()
 {
   // According to Kuraray specifications, each one of the cladding layers
-  // has a thickness of 2% the fiber thickness (side, or diameter)
-  G4double clad_thickness = 0.02 * thickness_;
+  // has a thickness of 2% the fiber thickness (side, or diameter).
+  // For Luxium fibers, the cladding thickness is 3% of the fiber thickness.
+  G4double clad_thickness = clad_percent_ * thickness_;
 
   // The coating (always of 1 micron thickness)
   G4double coating_thickness = 1. * um;
