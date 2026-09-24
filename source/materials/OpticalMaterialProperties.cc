@@ -2533,8 +2533,8 @@ namespace opticalprops {
       23.25455730982886 * m, 23.55276835859108 * m, 22.712152284509717 * m, 20.894782088757434 * m, 19.378766187327717 * m, 
       18.656691898886958 * m, 17.957168120860274 * m, 16.963529153670468 * m, 15.680369230084615 * m, 14.05764115798083 * m, 
       12.097930994128031 * m, 9.27918258641436 * m, 8.165396047968619 * m, 7.461019900650543 * m, 6.256314840063829 * m, 
-      4.565851961885266 * m, 2.827679168522945 * m, 1.4692612842564508 * m, 0.6987962936492076 * m, 0.35980305506823285 * m,
-      0.18933863190329583 * m, noAbsLength_, noAbsLength_
+      4.565851961885266 * m, 2.827679168522945 * m, 1.4692612842564508 * m, 0.6987962936492076 * m, 0.55980305506823285 * m,
+      0.3933863190329583 * m, noAbsLength_, noAbsLength_
     }; //Values from own measurement
 
     std::vector<G4double> absLength_shifted;
@@ -2584,7 +2584,7 @@ namespace opticalprops {
 
     // FROM MEASUREMENT. Narrow values: 475-385 nm. Might overestimate PDE.
     std::vector<G4double> WLS_abs_energy =   {optPhotMinE_};
-    for (G4double wavelength = 495.0; wavelength >= 365.0; wavelength -= 5.0) {
+    for (G4double wavelength = 500.0; wavelength >= 365.0; wavelength -= 5.0) {
       WLS_abs_energy.push_back(h_Planck * c_light / (wavelength * nm));
   }
   WLS_abs_energy.push_back(optPhotMaxE_);
@@ -2596,7 +2596,7 @@ namespace opticalprops {
       0.6373156554921885 * mm, 0.7964203866978237 * mm, 0.9715402930498029 * mm, noAbsLength_, noAbsLength_
     };*/
     std::vector<G4double> WLS_absLength = {
-      noAbsLength_, noAbsLength_, 2.797222678833683 * mm, 2.727060366263123 * mm, 2.638432978336101 * mm, 
+      noAbsLength_, noAbsLength_, 363.0*mm, 189.9 * mm, 95.5 * mm, 46.3 * mm, 
       2.281333583052618 * mm, 1.5959055207264554 * mm, 0.8839905638079544 * mm, 0.48486803433584724 * mm, 0.3598241623006371 * mm, 
       0.352326139502887 * mm, 0.38814656348307774 * mm, 0.40653265056208177 * mm, 0.3676677472100995 * mm, 0.314886001549878 * mm, 
       0.32070287379810397 * mm, 0.36871805873322056 * mm, 0.43240815391028775 * mm, 0.4664982773386802 * mm, 0.48725947464982927 * mm, 
@@ -2750,7 +2750,7 @@ namespace opticalprops {
         34.80831911429049 * m, 
         29.69613224894329 * m, 22.48120500319037 * m, 13.530499541693313 * m, 10.58324267838602 * m, 10.210327234177294 * m, 
         10.15140633204591 * m, 8.541486902869504 * m, 5.7125854912876495 * m, 2.986091329117266 * m, 1.2872670096666696 * m, 
-        0.5544932053427037 * m, 0.2673492248327196 * m,
+        0.5544932053427037 * m, 0.4673492248327196 * m,
         noAbsLength_, noAbsLength_
       }; //Values from own measurement
   
@@ -2803,7 +2803,7 @@ namespace opticalprops {
     WLS_abs_energy.push_back(optPhotMaxE_);
   
   
-      std::vector<G4double> WLS_absLength = {noAbsLength_, noAbsLength_, 2.4269268890475115 * mm, 2.224466333211696 * mm, 2.2396500255832876 * mm, 
+      std::vector<G4double> WLS_absLength = {noAbsLength_, noAbsLength_, 257.7 * mm, 118.7 * mm, 51.5 * mm, 
         1.997490023307646 * mm, 1.4647025722075995 * mm, 0.8368920360827146 * mm, 0.45923547064164694 * mm, 0.339608505901566 * mm, 
         0.33227987286089217 * mm, 0.36441147254510653 * mm, 0.3816986758739205 * mm, 0.34834731185505463 * mm, 0.3023650706746116 * mm, 
         0.30629471460557367 * mm, 0.34841392204230803 * mm, 0.40570833279046503 * mm, 0.4434852977969391 * mm, 0.46284393036617577 * mm, 
@@ -3068,7 +3068,7 @@ namespace opticalprops {
 
     // ABSORPTION LENGTH
     std::vector<G4double> abs_energy = {optPhotMinE_, optPhotMaxE_};
-    std::vector<G4double> absLength  = {1000*mm, 1000*mm};
+    std::vector<G4double> absLength  = {21*mm, 21*mm};
     mpt->AddProperty("ABSLENGTH", abs_energy, absLength);
 
     return mpt;
@@ -3125,7 +3125,7 @@ namespace opticalprops {
       optPhotMaxE_
     };
     std::vector<G4double> abslength = {
-      1000 * mm, 1000 * mm
+      21 * mm, 21 * mm
     };
     mpt->AddProperty("ABSLENGTH", abs_energy, abslength);
 

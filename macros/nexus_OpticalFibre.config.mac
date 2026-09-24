@@ -22,7 +22,7 @@
 /Geometry/OpticalFibre/aluminised true
 /Geometry/OpticalFibre/rand_wls 1
 /Geometry/OpticalFibre/rand_att 1
-/Geometry/OpticalFibre/qe 0.63
+/Geometry/OpticalFibre/qe 0.7
 /Geometry/OpticalFibre/doubleclad false
 
 /Generator/SingleParticle/particle opticalphoton
