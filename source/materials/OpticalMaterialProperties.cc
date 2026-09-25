@@ -1801,7 +1801,7 @@ namespace opticalprops {
       noAbsLength_};*/
 
   std::vector<G4double> abs_energy =   {optPhotMinE_};
-  for (G4double wavelength = 625.0; wavelength >= 485.0; wavelength -= 5.0) {
+  for (G4double wavelength = 625.0; wavelength >= 475.0; wavelength -= 5.0) {
     abs_energy.push_back(h_Planck * c_light / (wavelength * nm));
   }
   abs_energy.push_back(optPhotMaxE_);
@@ -1813,7 +1813,7 @@ namespace opticalprops {
       26.976747176446622 * m, 26.532098648785546 * m, 25.581778313422685 * m, 24.272109393559116 * m, 22.70507470280138 * m, 
       20.090120485768217 * m, 15.250645758735986 * m, 14.261820685097293 * m, 14.746002344116219 * m, 13.998950832941288 * m, 
       11.748016463405332 * m, 8.848943758172373 * m, 5.8742111855031105 * m, 3.311127838121963 * m, 1.6316295123168663 * m, 
-      0.7390228818740966 * m, noAbsLength_, noAbsLength_};
+      0.7390228818740966 * m, 0.7418100967656213 * m, 0.3354080841298026 * m, noAbsLength_, noAbsLength_};
 
     std::vector<G4double> absLength_shifted;
     absLength_shifted.reserve(absLength.size());
@@ -1966,13 +1966,14 @@ namespace opticalprops {
       noAbsLength_};*/
 
   std::vector<G4double> abs_energy =   {optPhotMinE_};
-  for (G4double wavelength = 515.0; wavelength >= 485.0; wavelength -= 5.0) {
+  for (G4double wavelength = 515.0; wavelength >= 475.0; wavelength -= 5.0) {
     abs_energy.push_back(h_Planck * c_light / (wavelength * nm));
   }
   abs_energy.push_back(optPhotMaxE_);
 
     std::vector<G4double> absLength = {noAbsLength_, noAbsLength_,
-      21.15719089028033 * m, 9.936002515627452 * m, 4.4601947311817565 * m, 1.914168185115402 * m, 0.7993462479055786 * m, noAbsLength_, noAbsLength_};
+      21.15719089028033 * m, 9.936002515627452 * m, 4.4601947311817565 * m, 1.914168185115402 * m, 0.7993462479055786 * m, 
+      0.7418100967656213 * m, 0.3354080841298026 * m, noAbsLength_, noAbsLength_};
 
     std::vector<G4double> absLength_shifted;
     absLength_shifted.reserve(absLength.size());
