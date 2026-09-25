@@ -183,13 +183,13 @@ namespace nexus {
     // Inside
     double source_position_cylinder_z = -cigar_length_/2 - panel_width + 4.5*mm;
     // Source placement
-    // inside_cigar_ = new CylinderPointSampler(7.5*mm/2, 0.1*mm, 0, 0, G4ThreeVector(source_position_cylinder_x,source_position_cylinder_y, source_position_cylinder_z-generic_cigar_shift), temp_rot);
-    double temp_position_x = 0.0;
-    double temp_position_y = 0.0;
-    double temp_position_z = 0.0;
+    inside_cigar_ = new CylinderPointSampler(7.5*mm/2, 0.1*mm, 0, 0, G4ThreeVector(source_position_cylinder_x,source_position_cylinder_y, source_position_cylinder_z-generic_cigar_shift), temp_rot);
+    //double temp_position_x = 0.0;
+    //double temp_position_y = 0.0;
+    //double temp_position_z = 0.0;
 
     // Source placement
-    inside_cigar_ = new CylinderPointSampler(7.5*mm/2, 0.1*mm, 0, 0, G4ThreeVector(temp_position_x, temp_position_y, temp_position_z-generic_cigar_shift), temp_rot);
+    //inside_cigar_ = new CylinderPointSampler(7.5*mm/2, 0.1*mm, 0, 0, G4ThreeVector(temp_position_x, temp_position_y, temp_position_z-generic_cigar_shift), temp_rot);
 
 
     // // Barium source position - ON TOP of vacuum chamber (radially at edge)
