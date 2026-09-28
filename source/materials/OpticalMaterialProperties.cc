@@ -1306,31 +1306,32 @@ namespace opticalprops {
     //  400. * nm,     noAbsLength_   // 100 nm
     //};
 
-    // WLS ABSORPTION LENGTH (Version NoSecWLS)
-    // The NoSecWLS is forced by setting the WLS_absLength to noAbsLength_
-    // for wavelengths higher than 380 nm where the WLS emission spectrum starts.
+    // WLS ABSORPTION LENGTH
+    // A former version only included data up to 380 nm, which intentionally
+    // avoided secondary absorption. Original comment:
+    //     The NoSecWLS is forced by setting the WLS_absLength to noAbsLength_
+    //     for wavelengths higher than 380 nm where the WLS emission spectrum starts.
     std::vector<G4double> WLS_abs_energy = {
       optPhotMinE_,
-      h_Planck * c_light / (380. * nm),  h_Planck * c_light / (370. * nm),
-      h_Planck * c_light / (360. * nm),  h_Planck * c_light / (330. * nm),
-      h_Planck * c_light / (320. * nm),  h_Planck * c_light / (310. * nm),
-      h_Planck * c_light / (300. * nm),  h_Planck * c_light / (270. * nm),
-      h_Planck * c_light / (250. * nm),  h_Planck * c_light / (230. * nm),
-      h_Planck * c_light / (210. * nm),  h_Planck * c_light / (190. * nm),
-      h_Planck * c_light / (170. * nm),  h_Planck * c_light / (150. * nm),
-      h_Planck * c_light / (100. * nm),  optPhotMaxE_
+      hc_ / (460. * nm),  hc_ / (440. * nm), hc_ / (420. * nm),
+      hc_ / (410. * nm),  hc_ / (400. * nm), hc_ / (390. * nm),
+      hc_ / (380. * nm),  hc_ / (370. * nm), hc_ / (360. * nm),
+      hc_ / (330. * nm),  hc_ / (320. * nm), hc_ / (310. * nm),
+      hc_ / (300. * nm),  hc_ / (270. * nm), hc_ / (250. * nm),
+      hc_ / (230. * nm),  hc_ / (210. * nm), hc_ / (190. * nm),
+      hc_ / (170. * nm),  hc_ / (150. * nm),
+      optPhotMaxE_
     };
 
     std::vector<G4double> WLS_absLength = {
-      noAbsLength_,
-      noAbsLength_,   50. * nm,     // 380 , 370 nm
-      30. * nm,      30. * nm,     // 360 , 330 nm
-      50. * nm,      80. * nm,     // 320 , 310 nm
-      100. * nm,     100. * nm,     // 300 , 270 nm
-      400. * nm,     400. * nm,     // 250 , 230 nm
-      350. * nm,     250. * nm,     // 210 , 190 nm
-      350. * nm,     400. * nm,     // 170 , 150 nm
-      400. * nm,     noAbsLength_   // 100 nm
+      noAbsLength_,                     // ~6200 nm
+      noAbsLength_, 1 * mm, 10. * um,   // 460, 440, 420 nm
+      4 * um, 1.5 * um, 800. * nm,      // 410, 400, 390 nm
+      300 * nm, 50. * nm, 30. * nm,     // 380, 370, 360 nm
+      30. * nm, 50. * nm, 80. * nm,     // 330, 320, 310 nm
+      100. * nm, 100. * nm, 400. * nm,  // 300, 270, 250 nm
+      400. * nm, 350. * nm, 250. * nm,  // 230, 210, 190 nm
+      350. * nm, 400. * nm, 400. * nm   // 170, 150, ~108 nm
     };
 
     //for (int i=0; i<WLS_abs_entries; i++)

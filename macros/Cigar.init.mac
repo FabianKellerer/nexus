@@ -18,6 +18,6 @@
 /nexus/RegisterEventAction DefaultEventAction
 /nexus/RegisterTrackingAction DefaultTrackingAction
 /nexus/RegisterTrackingAction OpticalTrackingAction
-#/nexus/RegisterSteppingAction AnalysisSteppingAction
+/nexus/RegisterSteppingAction AnalysisSteppingAction
 
 /nexus/RegisterMacro macros/Cigar.config.mac
